@@ -1,1 +1,36 @@
 .env
+
+/src/generated/prisma
+
+node_modules
+
+.claude
+
+.agents
+.windsurf
+
+
+# Environment variables
+.env*
+.env.*
+.env.backup
+.env.local
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+/dist
+/build
+/coverage
+
+# Misc
+.env.example
