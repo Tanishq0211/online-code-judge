@@ -1,0 +1,13 @@
+.env
+.env.backup
+
+/src/generated/prisma
+
+node_modules
+
+.claude
+
+.agents
+.windsurf
+
+
