@@ -11,6 +11,7 @@ const errorHandler = require('./middleware/errorHandler');
 const { register, login, refresh } = require('./controllers/authController');
 const authenticate = require('./middleware/authenticate');
 const authorize = require('./middleware/authorize');
+const problemsRouter = require('./routes/problems');
 const { body, validationResult } = require('express-validator');
 
 const app = express();
@@ -44,10 +45,6 @@ authRouter.post(
     body('password')
       .isLength({ min: 6 })
       .withMessage('Password must be at least 6 characters'),
-    body('role')
-      .optional()
-      .isIn(['user', 'moderator', 'admin'])
-      .withMessage('Role must be one of: user, moderator, admin'),
   ],
   asyncHandler(async (req, res) => {
     await register(req, res);
@@ -86,6 +83,9 @@ authRouter.post(
 // Mount auth router under /api/auth
 app.use('/api/auth', authRouter);
 
+// Mount problem router under /api/problems
+app.use('/api/problems', problemsRouter);
+
 // ----- Example Protected Routes -----
 
 // GET /api/me – accessible to any logged‑in user
@@ -96,7 +96,7 @@ app.get(
   asyncHandler(async (req, res) => {
     const prisma = require('./lib/prisma');
     const freshUser = await prisma.users.findUnique({
-      where: { id: req.user.userId },
+      where: { id: BigInt(req.user.userId) },
       select: {
         id: true,
         username: true,

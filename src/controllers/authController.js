@@ -4,6 +4,7 @@ const {
   signAccessToken,
   signRefreshToken,
   verifyAccessToken,
+  verifyRefreshToken,
 } = require('../utils/jwt');
 const { validationResult } = require('express-validator');
 
@@ -18,7 +19,7 @@ async function register(req, res) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const { username, email, password, role = 'user' } = req.body;
+  const { username, email, password } = req.body;
 
   // 2������������������������������️������������������������������⃣ Ensure user doesn't already exist
   const existing = await prisma.users.findFirst({
@@ -39,7 +40,7 @@ async function register(req, res) {
       username,
       email,
       password_hash: passwordHash,
-      role,
+      role: 'user', // SECURITY: never trust a client-supplied role — promote out-of-band (scripts/make-admin.js)
       // rating defaults to 0 via Prisma model
     },
     select: { id: true, username: true, email: true, role: true, created_at: true },
@@ -130,11 +131,19 @@ async function refresh(req, res) {
 
   try {
     const payload = verifyRefreshToken(refreshToken);
-    // Optionally verify that refresh token is still valid (e.g., stored in DB)
+    // Refresh tokens only carry userId, so fetch current role/email from the DB —
+    // the new access token then reflects the latest state (e.g. role changes).
+    const user = await prisma.users.findUnique({
+      where: { id: BigInt(payload.userId) },
+      select: { id: true, role: true, email: true },
+    });
+    if (!user) {
+      return res.status(401).json({ error: 'User no longer exists' });
+    }
     const newAccess = signAccessToken({
-      userId: payload.userId,
-      role: payload.role, // you’d need to fetch role from DB if it can change
-      email: payload.email, // same note
+      userId: user.id,
+      role: user.role,
+      email: user.email,
     });
     res.json({ accessToken: newAccess });
   } catch (err) {
