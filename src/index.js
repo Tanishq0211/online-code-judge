@@ -12,6 +12,7 @@ const { register, login, refresh } = require('./controllers/authController');
 const authenticate = require('./middleware/authenticate');
 const authorize = require('./middleware/authorize');
 const problemsRouter = require('./routes/problems');
+const submissionsRouter = require('./routes/submissions');
 const { body, validationResult } = require('express-validator');
 
 const app = express();
@@ -85,6 +86,9 @@ app.use('/api/auth', authRouter);
 
 // Mount problem router under /api/problems
 app.use('/api/problems', problemsRouter);
+
+// Mount submission router under /api/submissions
+app.use('/api/submissions', submissionsRouter);
 
 // ----- Example Protected Routes -----
 
