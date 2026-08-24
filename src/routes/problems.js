@@ -8,6 +8,7 @@ const optionalAuth = require('../middleware/optionalAuth');
 const {
   listProblems, getProblem, createProblem, updateProblem, deleteProblem,
 } = require('../controllers/problemController');
+const testCasesRouter = require('./testCases');
 
 const router = express.Router();
 
@@ -59,5 +60,8 @@ router.get('/:slug', optionalAuth, asyncHandler(getProblem));
 router.post('/', authenticate, authorize(MUTATE_ROLES), createRules, asyncHandler(createProblem));
 router.patch('/:id', authenticate, authorize(MUTATE_ROLES), updateRules, asyncHandler(updateProblem));
 router.delete('/:id', authenticate, authorize(MUTATE_ROLES), idRule, asyncHandler(deleteProblem));
+
+// Nested test-case routes: /api/problems/:slug/test-cases (see routes/testCases.js)
+router.use('/:slug/test-cases', testCasesRouter);
 
 module.exports = router;

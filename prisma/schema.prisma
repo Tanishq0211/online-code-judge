@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model languages {
+  id              BigInt        @id @default(autoincrement())
+  name            String        @unique @db.VarChar(50)
+  version         String?       @db.VarChar(100)
+  docker_image    String
+  compile_command String?
+  run_command     String
+  submissions     submissions[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model problems {
+  id              BigInt        @id @default(autoincrement())
+  slug            String        @unique @db.VarChar(150)
+  title           String        @db.VarChar(255)
+  statement       String
+  input_format    String?
+  output_format   String?
+  constraints     String?
+  difficulty      String        @db.VarChar(20)
+  time_limit_ms   Int           @default(1000)
+  memory_limit_mb Int           @default(256)
+  created_by      BigInt?
+  is_public       Boolean       @default(true)
+  created_at      DateTime      @default(now()) @db.Timestamp(6)
+  updated_at      DateTime      @default(now()) @db.Timestamp(6)
+  users           users?        @relation(fields: [created_by], references: [id], onUpdate: NoAction)
+  submissions     submissions[]
+  test_cases      test_cases[]
+
+  @@index([difficulty], map: "idx_problems_difficulty")
+  @@index([slug], map: "idx_problems_slug")
+  @@index([is_public], map: "idx_problems_public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model submission_test_results {
+  id            BigInt      @id @default(autoincrement())
+  submission_id BigInt
+  test_case_id  BigInt
+  status        String      @db.VarChar(30)
+  runtime_ms    Int?
+  memory_kb     Int?
+  stdout        String?
+  stderr        String?
+  submissions   submissions @relation(fields: [submission_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  test_cases    test_cases  @relation(fields: [test_case_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([submission_id, test_case_id])
+  @@index([submission_id], map: "idx_submission_results_submission")
+  @@index([test_case_id], map: "idx_submission_results_testcase")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model submissions {
+  id                      BigInt                    @id @default(autoincrement())
+  user_id                 BigInt
+  problem_id              BigInt
+  language_id             BigInt
+  source_code             String
+  status                  String                    @default("pending") @db.VarChar(30)
+  runtime_ms              Int?
+  memory_kb               Int?
+  compiler_output         String?
+  stdout                  String?
+  stderr                  String?
+  submitted_at            DateTime                  @default(now()) @db.Timestamp(6)
+  completed_at            DateTime?                 @db.Timestamp(6)
+  submission_test_results submission_test_results[]
+  languages               languages                 @relation(fields: [language_id], references: [id], onUpdate: NoAction)
+  problems                problems                  @relation(fields: [problem_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users                   users                     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([language_id], map: "idx_submissions_language")
+  @@index([problem_id], map: "idx_submissions_problem")
+  @@index([status], map: "idx_submissions_status")
+  @@index([submitted_at(sort: Desc)], map: "idx_submissions_submitted")
+  @@index([user_id], map: "idx_submissions_user")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model test_cases {
+  id                      BigInt                    @id @default(autoincrement())
+  problem_id              BigInt
+  input                   String
+  expected_output         String
+  is_visible              Boolean                   @default(false)
+  order_index             Int
+  submission_test_results submission_test_results[]
+  problems                problems                  @relation(fields: [problem_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([problem_id, order_index])
+  @@index([problem_id], map: "idx_test_cases_problem")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model users {
+  id            BigInt        @id @default(autoincrement())
+  username      String        @unique @db.VarChar(50)
+  email         String        @unique @db.VarChar(255)
+  password_hash String
+  role          String        @default("user") @db.VarChar(20)
+  rating        Int           @default(0)
+  created_at    DateTime      @default(now()) @db.Timestamp(6)
+  updated_at    DateTime      @default(now()) @db.Timestamp(6)
+  problems      problems[]
+  submissions   submissions[]
+
+  @@index([email], map: "idx_users_email")
+  @@index([username], map: "idx_users_username")
+}

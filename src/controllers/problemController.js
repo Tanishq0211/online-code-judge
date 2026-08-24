@@ -1,9 +1,6 @@
 const prisma = require('../lib/prisma');
 const { validationResult } = require('express-validator');
-
-// Roles that may see non-public problems and mutate problems.
-const PRIVILEGED_ROLES = ['moderator', 'admin'];
-const isPrivileged = (req) => !!req.user && PRIVILEGED_ROLES.includes(req.user.role);
+const { isPrivileged } = require('../lib/roles');
 
 // Prisma returns BigInt for id/created_by — JSON can't serialize BigInt, so stringify.
 function serialize(p) {
