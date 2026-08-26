@@ -1,5 +1,5 @@
 // End-to-end check for the Phase 5b Docker judge. Needs Docker + the language images:
-//   docker pull python:3.12 && docker pull gcc:13
+//   docker pull python:3.12 && docker pull gcc:13 && docker pull eclipse-temurin:21
 //   node scripts/test-judge.js
 // Runs real containers, so it's slow (~30-60s). No HTTP server required — it drives the
 // judge core directly and asserts the persisted verdicts.
@@ -23,7 +23,8 @@ async function judge(userId, problemId, languageId, source) {
   const byName = Object.fromEntries(langs.map((l) => [l.name, l.id]));
   const PYTHON = byName.Python;
   const CPP = byName['C++'];
-  assert.ok(PYTHON && CPP, 'Python and C++ languages must be seeded');
+  const JAVA = byName.Java;
+  assert.ok(PYTHON && CPP && JAVA, 'Python, C++ and Java languages must be seeded');
 
   const user = await prisma.users.create({
     data: { username: `judge${uniq}`, email: `judge${uniq}@ex.com`, password_hash: 'x', role: 'user' },
@@ -68,6 +69,15 @@ async function judge(userId, problemId, languageId, source) {
     assert.strictEqual(ceCpp.status, 'compilation_error', `cpp CE, got ${ceCpp.status}`);
     assert.ok(ceCpp.compiler_output && ceCpp.compiler_output.length > 0, 'compiler_output captured');
     assert.ok(ceCpp.submission_test_results.every((r) => r.status === 'skipped'), 'tests skipped on CE');
+
+    // --- Java (compiled; user code must declare `public class Main`) ---
+    const okJava = await judge(user.id, problem.id, JAVA,
+      'import java.util.Scanner;\npublic class Main{public static void main(String[] a){Scanner s=new Scanner(System.in);System.out.print(s.nextInt()+s.nextInt());}}');
+    assert.strictEqual(okJava.status, 'accepted', `java accepted, got ${okJava.status}`);
+
+    const ceJava = await judge(user.id, problem.id, JAVA, 'public class Main { not valid java }');
+    assert.strictEqual(ceJava.status, 'compilation_error', `java CE, got ${ceJava.status}`);
+    assert.ok(ceJava.compiler_output && ceJava.compiler_output.length > 0, 'java compiler_output captured');
 
     console.log('✅ Phase 5b judge: all checks passed');
   } finally {

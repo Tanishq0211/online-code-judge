@@ -1,17 +1,18 @@
 // Docker-sandboxed judge core. Claims a submission, runs its source against the
 // problem's test cases in a locked-down container, and writes the verdicts.
 //
-// Sandbox: one container per submission (`docker run -d`), --network none, memory +
-// swap capped at the problem's limit, --pids-limit fork-bomb guard, --cpus 1. Per-test
-// time limit is enforced INSIDE the container with coreutils `timeout` (exit 124 = TLE);
-// a kernel OOM-kill surfaces as exit 137 = MLE. User source is piped in over stdin and
-// never interpolated into a shell — only trusted DB commands + a numeric timeout are.
+// Sandbox: one container per submission (`docker run -d`), locked down with --network none,
+// memory+swap capped at the problem's limit, --pids-limit fork-bomb guard, --cpus 1, run as
+// nobody (--user 65534) on a --read-only rootfs with writable tmpfs only on /work and /tmp,
+// all Linux capabilities dropped, and no-new-privileges. Per-test time limit is enforced
+// INSIDE the container with coreutils `timeout` (exit 124 = TLE); a kernel OOM-kill surfaces
+// as exit 137 = MLE. User source is piped in over stdin and never interpolated into a shell —
+// only trusted DB commands + a numeric timeout are.
 //
-// ponytail: Java (openjdk:21) is wired but unverified here — identical compiled-language
-// path to C++. Ceilings: runtime_ms is host wall-clock (includes exec overhead); memory_kb
-// is left NULL (needs /usr/bin/time or per-test containers); 137→MLE is a heuristic (any
-// SIGKILL reads as MLE); the container runs as root without --read-only. Fine for a
-// localhost judge — upgrade to gVisor/rootless + cgroup metrics for untrusted load.
+// ponytail: Ceilings left in place — runtime_ms is host wall-clock (includes exec overhead);
+// memory_kb is NULL (accurate per-test memory needs per-test containers or /usr/bin/time,
+// which the images lack); 137→MLE is a heuristic (any SIGKILL reads as MLE). For untrusted
+// public load the next steps are a stricter seccomp profile and a gVisor/Kata runtime.
 
 const { execFile } = require('child_process');
 const prisma = require('../lib/prisma');
@@ -65,8 +66,19 @@ async function judgeSubmission(submissionId) {
   if (!srcName) throw new Error(`no source-filename mapping for language "${language.name}"`);
 
   const mem = `${problem.memory_limit_mb}m`;
-  const started = await run(['run', '-d', '--network', 'none', '--memory', mem, '--memory-swap', mem,
-    '--pids-limit', '128', '--cpus', '1', '-w', '/work', language.docker_image, 'sleep', String(CONTAINER_TTL_S)]);
+  const started = await run(['run', '-d',
+    '--network', 'none',                    // no network access
+    '--memory', mem, '--memory-swap', mem,  // hard memory cap, no swap
+    '--pids-limit', '128',                  // fork-bomb guard
+    '--cpus', '1',
+    '--user', '65534:65534',                // run as nobody, never root
+    '--read-only',                          // immutable rootfs
+    '--tmpfs', '/work:exec,mode=1777',      // writable scratch: source + build output + exec
+    '--tmpfs', '/tmp:mode=1777',            // g++/javac intermediates, JVM perfdata
+    '--cap-drop', 'ALL',                    // drop every Linux capability
+    '--security-opt', 'no-new-privileges',  // block setuid privilege escalation
+    '-w', '/work',
+    language.docker_image, 'sleep', String(CONTAINER_TTL_S)]);
   if (started.code !== 0) throw new Error(`container start failed: ${started.stderr.trim() || started.stdout.trim()}`);
   const cid = started.stdout.trim();
 
@@ -86,6 +98,8 @@ async function judgeSubmission(submissionId) {
       }
     }
 
+    // ponytail: assumes GNU coreutils `timeout` (exit 124 on TLE); busybox/Alpine returns
+    // 143 and would mis-map to runtime_error — keep language images glibc-based.
     const timeoutSec = String(problem.time_limit_ms / 1000);
     const perTest = [];
     let overall = 'accepted';

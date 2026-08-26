@@ -1,6 +1,6 @@
 // Long-running judge worker: polls for queued submissions and judges them one at a time.
 //   node scripts/judge-worker.js   (or: npm run judge)
-// Requires Docker + the language images pulled (docker pull python:3.12 gcc:13 openjdk:21).
+// Requires Docker + the language images pulled (docker pull python:3.12 gcc:13 eclipse-temurin:21).
 require('dotenv').config({ quiet: true });
 const prisma = require('../src/lib/prisma');
 const { claimNext, judgeSubmission } = require('../src/services/judge');
