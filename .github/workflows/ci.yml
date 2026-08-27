@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, feature/backend]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: judge
+          POSTGRES_PASSWORD: judge
+          POSTGRES_DB: judge_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U judge"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://judge:judge@localhost:5432/judge_test
+      JWT_ACCESS_SECRET: ci-access-secret
+      JWT_REFRESH_SECRET: ci-refresh-secret
+      JWT_ACCESS_EXPIRES_IN: 15m
+      JWT_REFRESH_EXPIRES_IN: 7d
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma db push --skip-generate # schema-first project: create tables, no migration history
+      - run: npm test
+      # ponytail: CI covers unit + API integration. The Docker container judge
+      # (scripts/test-judge.js) needs Docker-in-Docker + multi-GB language images
+      # and is left out; the judge's pure verdict logic is unit-covered instead.

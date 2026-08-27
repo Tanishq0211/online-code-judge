@@ -186,8 +186,12 @@ app.get(
 // ----- Central Error Handler (must be last) -----
 app.use(errorHandler);
 
-// ----- Start Server -----
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  logger.info(`Server running on http://localhost:${PORT}`);
-});
+// ----- Start Server (only when run directly; tests import `app` via supertest) -----
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    logger.info(`Server running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
