@@ -1,6 +1,7 @@
 # Dev overrides, auto-merged by `docker compose up`. Live source + hot reload.
-# CHOKIDAR_USEPOLLING makes nodemon's file watching work across the bind mount on
-# Docker Desktop (Windows/macOS), where inotify events don't cross the boundary.
+# Both services run the TypeScript sources directly through tsx (no build step).
+# CHOKIDAR_USEPOLLING makes file watching work across the bind mount on Docker
+# Desktop (Windows/macOS), where inotify events don't cross the boundary.
 #
 # For a prod-style run without these overrides:
 #   docker compose -f docker-compose.yaml up -d --build
@@ -16,9 +17,10 @@ services:
       - .:/app
       - /app/node_modules   # keep the image's deps (host's may be wrong-OS or absent)
       - /app/src/generated  # keep the image's generated prisma client
+      - /app/dist           # keep the image's build output out of the host's way
 
   judge:
-    command: npx nodemon scripts/judge-worker.js
+    command: npx tsx watch scripts/judge-worker.ts
     environment:
       LOG_LEVEL: debug
       CHOKIDAR_USEPOLLING: "true"
@@ -26,4 +28,5 @@ services:
       - .:/app
       - /app/node_modules
       - /app/src/generated
+      - /app/dist
       - /var/run/docker.sock:/var/run/docker.sock

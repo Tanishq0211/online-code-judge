@@ -1,15 +1,15 @@
 // Promote an existing user to a role (default: admin). Registration no longer
 // accepts a role, so this is how you bootstrap the first admin/moderator.
-//   node scripts/make-admin.js <username> [role]
-require('dotenv').config();
-const prisma = require('../src/lib/prisma');
+//   node dist/scripts/make-admin.js <username> [role]
+import 'dotenv/config'; // must stay first: src/lib/prisma reads DATABASE_URL at import time
+import prisma from '../src/lib/prisma';
 
 const [, , username, role = 'admin'] = process.argv;
 const ROLES = ['user', 'moderator', 'admin'];
 
 async function main() {
   if (!username) {
-    console.error('Usage: node scripts/make-admin.js <username> [role=admin]');
+    console.error('Usage: node dist/scripts/make-admin.js <username> [role=admin]');
     process.exit(1);
   }
   if (!ROLES.includes(role)) {
@@ -31,8 +31,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
-    console.error('❌', e.message);
+  .catch((e: unknown) => {
+    console.error('❌', e instanceof Error ? e.message : e);
     process.exitCode = 1;
   })
   .finally(() => prisma.$disconnect());

@@ -1,9 +1,9 @@
-require('dotenv').config(); // DATABASE_URL + JWT secrets (no-op in CI where they're real env)
-const { test, after } = require('node:test');
-const assert = require('node:assert');
-const request = require('supertest');
-const app = require('../../src/index');
-const prisma = require('../../src/lib/prisma');
+import 'dotenv/config'; // DATABASE_URL + JWT secrets (no-op in CI where they're real env)
+import { test, after } from 'node:test';
+import assert from 'node:assert';
+import request from 'supertest';
+import app from '../../src/index';
+import prisma from '../../src/lib/prisma';
 
 const uname = `itest${Date.now()}`; // unique so reruns don't collide
 const email = `${uname}@example.com`;

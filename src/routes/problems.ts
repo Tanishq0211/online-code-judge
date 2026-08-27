@@ -1,14 +1,14 @@
-const express = require('express');
-const { body, param, query } = require('express-validator');
+import express from 'express';
+import { body, param, query, type ValidationChain } from 'express-validator';
 
-const asyncHandler = require('../middleware/asyncHandler');
-const authenticate = require('../middleware/authenticate');
-const authorize = require('../middleware/authorize');
-const optionalAuth = require('../middleware/optionalAuth');
-const {
+import asyncHandler from '../middleware/asyncHandler';
+import authenticate from '../middleware/authenticate';
+import authorize from '../middleware/authorize';
+import optionalAuth from '../middleware/optionalAuth';
+import {
   listProblems, getProblem, createProblem, updateProblem, deleteProblem,
-} = require('../controllers/problemController');
-const testCasesRouter = require('./testCases');
+} from '../controllers/problemController';
+import testCasesRouter from './testCases';
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const MUTATE_ROLES = ['moderator', 'admin'];
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 // ----- reusable field validators -----
-const slugRule = (chain) =>
+const slugRule = (chain: ValidationChain): ValidationChain =>
   chain.trim()
     .isLength({ min: 1, max: 150 }).withMessage('Slug must be 1–150 characters')
     .matches(SLUG_RE).withMessage('Slug must be lowercase alphanumeric words separated by hyphens');
@@ -61,7 +61,7 @@ router.post('/', authenticate, authorize(MUTATE_ROLES), createRules, asyncHandle
 router.patch('/:id', authenticate, authorize(MUTATE_ROLES), updateRules, asyncHandler(updateProblem));
 router.delete('/:id', authenticate, authorize(MUTATE_ROLES), idRule, asyncHandler(deleteProblem));
 
-// Nested test-case routes: /api/problems/:slug/test-cases (see routes/testCases.js)
+// Nested test-case routes: /api/problems/:slug/test-cases (see routes/testCases.ts)
 router.use('/:slug/test-cases', testCasesRouter);
 
-module.exports = router;
+export default router;

@@ -1,7 +1,7 @@
-require('dotenv').config(); // judge.js pulls in prisma; load env so client construction is happy
-const { test } = require('node:test');
-const assert = require('node:assert');
-const { normalize, verdictFromRun } = require('../../src/services/judge');
+import 'dotenv/config'; // judge.ts pulls in prisma; load env so client construction is happy
+import { test } from 'node:test';
+import assert from 'node:assert';
+import { normalize, verdictFromRun } from '../../src/services/judge';
 
 test('normalize: strips CRLF, trailing whitespace, and trailing newlines', () => {
   assert.strictEqual(normalize('a  \r\nb\t\n\n\n'), 'a\nb');

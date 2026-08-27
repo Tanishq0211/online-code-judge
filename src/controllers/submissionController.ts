@@ -1,9 +1,13 @@
-const prisma = require('../lib/prisma');
-const { validationResult } = require('express-validator');
-const { isPrivileged } = require('../lib/roles');
+import type { Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+
+import prisma from '../lib/prisma';
+import type { Prisma } from '../generated/prisma';
+import { isPrivileged } from '../lib/roles';
+import { str, int, one } from '../lib/query';
 
 // BigInt columns can't be JSON-serialized — stringify them.
-function serialize(s) {
+function serialize<T extends { id: bigint; user_id: bigint; problem_id: bigint; language_id: bigint }>(s: T) {
   return {
     ...s,
     id: s.id.toString(),
@@ -12,7 +16,7 @@ function serialize(s) {
     language_id: s.language_id.toString(),
   };
 }
-function serializeResult(r) {
+function serializeResult<T extends { id: bigint; submission_id: bigint; test_case_id: bigint }>(r: T) {
   return {
     ...r,
     id: r.id.toString(),
@@ -29,9 +33,12 @@ function serializeResult(r) {
  * cases, writes submission_test_results, and sets the final status. Judging is slow
  * and must be concurrency-bounded, so it stays out of this request path on purpose.
  */
-async function createSubmission(req, res) {
+export async function createSubmission(req: Request, res: Response): Promise<void> {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   // Parse from the original strings (not .toInt()) to keep BigInt precision.
   const problem_id = BigInt(req.body.problem_id);
@@ -39,14 +46,18 @@ async function createSubmission(req, res) {
 
   const problem = await prisma.problems.findUnique({ where: { id: problem_id } });
   if (!problem || (!problem.is_public && !isPrivileged(req))) {
-    return res.status(404).json({ error: 'Problem not found' }); // don't reveal hidden problems
+    res.status(404).json({ error: 'Problem not found' }); // don't reveal hidden problems
+    return;
   }
   const language = await prisma.languages.findUnique({ where: { id: language_id } });
-  if (!language) return res.status(400).json({ error: 'Unknown language_id' });
+  if (!language) {
+    res.status(400).json({ error: 'Unknown language_id' });
+    return;
+  }
 
   const submission = await prisma.submissions.create({
     data: {
-      user_id: BigInt(req.user.userId),
+      user_id: BigInt(req.user!.userId),
       problem_id,
       language_id,
       source_code: req.body.source_code,
@@ -61,21 +72,28 @@ async function createSubmission(req, res) {
  * Users see only their own; mod/admin see all and may filter by user_id.
  * Query: page, limit, status, problem_id, user_id (privileged only).
  */
-async function listSubmissions(req, res) {
+export async function listSubmissions(req: Request, res: Response): Promise<void> {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
-
-  const page = parseInt(req.query.page, 10) || 1;
-  const limit = Math.min(parseInt(req.query.limit, 10) || 20, 100);
-
-  const where = {};
-  if (!isPrivileged(req)) {
-    where.user_id = BigInt(req.user.userId); // non-privileged: own submissions only
-  } else if (req.query.user_id) {
-    where.user_id = BigInt(req.query.user_id);
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
   }
-  if (req.query.problem_id) where.problem_id = BigInt(req.query.problem_id);
-  if (req.query.status) where.status = req.query.status;
+
+  const page = int(req.query.page, 1);
+  const limit = Math.min(int(req.query.limit, 20), 100);
+
+  const userIdFilter = str(req.query.user_id);
+  const problemIdFilter = str(req.query.problem_id);
+  const statusFilter = str(req.query.status);
+
+  const where: Prisma.submissionsWhereInput = {};
+  if (!isPrivileged(req)) {
+    where.user_id = BigInt(req.user!.userId); // non-privileged: own submissions only
+  } else if (userIdFilter) {
+    where.user_id = BigInt(userIdFilter);
+  }
+  if (problemIdFilter) where.problem_id = BigInt(problemIdFilter);
+  if (statusFilter) where.status = statusFilter;
 
   const [total, rows] = await Promise.all([
     prisma.submissions.count({ where }),
@@ -103,16 +121,20 @@ async function listSubmissions(req, res) {
  * GET /api/submissions/:id  (owner or mod/admin)
  * Full detail incl. source_code and per-test results.
  */
-async function getSubmission(req, res) {
+export async function getSubmission(req: Request, res: Response): Promise<void> {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
   const submission = await prisma.submissions.findUnique({
-    where: { id: BigInt(req.params.id) },
+    where: { id: BigInt(one(req.params.id)) },
     include: { submission_test_results: { orderBy: { test_case_id: 'asc' } } },
   });
-  if (!submission || (submission.user_id !== BigInt(req.user.userId) && !isPrivileged(req))) {
-    return res.status(404).json({ error: 'Submission not found' }); // 404, not 403 — don't reveal others' submissions
+  if (!submission || (submission.user_id !== BigInt(req.user!.userId) && !isPrivileged(req))) {
+    res.status(404).json({ error: 'Submission not found' }); // 404, not 403 — don't reveal others' submissions
+    return;
   }
 
   const { submission_test_results, ...s } = submission;
@@ -121,5 +143,3 @@ async function getSubmission(req, res) {
     testResults: submission_test_results.map(serializeResult),
   });
 }
-
-module.exports = { createSubmission, listSubmissions, getSubmission };

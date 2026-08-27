@@ -1,14 +1,16 @@
-// Secrets must be set BEFORE requiring jwt.js — it reads process.env at load time.
+// Secrets must be set BEFORE importing jwt.ts — it reads process.env at load time.
+// Safe under tsc's CommonJS emit: it does NOT hoist imports above preceding statements
+// (esbuild/tsx would, but the test suite runs the compiled dist/ output).
 process.env.JWT_ACCESS_SECRET = 'test-access-secret';
 process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
 process.env.JWT_ACCESS_EXPIRES_IN = '15m';
 process.env.JWT_REFRESH_EXPIRES_IN = '7d';
 
-const { test } = require('node:test');
-const assert = require('node:assert');
-const {
+import { test } from 'node:test';
+import assert from 'node:assert';
+import {
   signAccessToken, verifyAccessToken, signRefreshToken, verifyRefreshToken,
-} = require('../../src/utils/jwt');
+} from '../../src/utils/jwt';
 
 test('access token round-trips and coerces BigInt userId to string', () => {
   const token = signAccessToken({ userId: 42n, role: 'user', email: 'a@b.co' });

@@ -3,6 +3,7 @@ node_modules
 .gitignore
 .env*
 src/generated
+dist
 test
 *.md
 .github
@@ -11,4 +12,4 @@ test
 .windsurf
 Dockerfile
 .dockerignore
-docker-compose*.yml
+docker-compose*

@@ -1,4 +1,5 @@
-const { verifyAccessToken } = require('../utils/jwt');
+import type { Request, Response, NextFunction } from 'express';
+import { verifyAccessToken } from '../utils/jwt';
 
 /**
  * Like `authenticate`, but does not require a token.
@@ -8,20 +9,21 @@ const { verifyAccessToken } = require('../utils/jwt');
  *
  * Used by public read routes that still grant extra visibility to moderators/admins.
  */
-function optionalAuth(req, res, next) {
+function optionalAuth(req: Request, res: Response, next: NextFunction): void {
   const authHeader = req.headers.authorization;
   if (!authHeader) return next(); // anonymous
 
   if (!authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ error: 'Malformed Authorization header' });
+    res.status(401).json({ error: 'Malformed Authorization header' });
+    return;
   }
 
   try {
     req.user = verifyAccessToken(authHeader.slice(7)); // { userId, role, email, iat, exp }
     next();
-  } catch (err) {
-    return res.status(401).json({ error: 'Invalid or expired token' });
+  } catch {
+    res.status(401).json({ error: 'Invalid or expired token' });
   }
 }
 
-module.exports = optionalAuth;
+export default optionalAuth;

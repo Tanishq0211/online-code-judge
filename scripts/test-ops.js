@@ -60,7 +60,7 @@ async function checks() {
   console.log('\n✅ Phase 7 ops: all checks passed');
 }
 
-const server = spawn('node', ['src/index.js'], {
+const server = spawn('node', ['dist/src/index.js'], { // built output (npm run build)
   env: { ...process.env, PORT: String(PORT), LOG_LEVEL: 'silent' },
   stdio: 'inherit',
 });

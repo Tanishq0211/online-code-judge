@@ -14,19 +14,39 @@
 // which the images lack); 137→MLE is a heuristic (any SIGKILL reads as MLE). For untrusted
 // public load the next steps are a stricter seccomp profile and a gVisor/Kata runtime.
 
-const { execFile } = require('child_process');
-const prisma = require('../lib/prisma');
+import { execFile, type ExecFileException } from 'child_process';
+import prisma from '../lib/prisma';
+import type { submissions } from '../generated/prisma';
 
 // The DB compile/run commands assume these filenames, run from cwd /work.
-const SOURCE_FILE = { 'C++': 'main.cpp', Python: 'main.py', Java: 'Main.java' };
+const SOURCE_FILE: Record<string, string> = { 'C++': 'main.cpp', Python: 'main.py', Java: 'Main.java' };
 const COMPILE_TIMEOUT_S = 20;
 const CONTAINER_TTL_S = 600; // sleeper lifetime; we rm -f in finally regardless
 const OUTPUT_CAP = 10_000;   // chars stored per stdout / stderr / compiler_output
 
-function run(args, { input, timeoutMs = 60_000 } = {}) {
+export interface RunResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
+/** One row destined for submission_test_results. */
+interface TestResultRow {
+  test_case_id: bigint;
+  status: string;
+  runtime_ms?: number | null;
+  memory_kb?: number | null;
+  stdout?: string;
+  stderr?: string;
+}
+
+function run(
+  args: string[],
+  { input, timeoutMs = 60_000 }: { input?: string; timeoutMs?: number } = {}
+): Promise<RunResult> {
   return new Promise((resolve) => {
     const child = execFile('docker', args, { maxBuffer: 32 * 1024 * 1024, timeout: timeoutMs },
-      (err, stdout, stderr) => {
+      (err: ExecFileException | null, stdout, stderr) => {
         let code = 0;
         if (err) {
           if (err.killed) code = 124;                 // host backstop fired -> treat as TLE
@@ -35,24 +55,24 @@ function run(args, { input, timeoutMs = 60_000 } = {}) {
         }
         resolve({ code, stdout: stdout || '', stderr: stderr || '' });
       });
-    if (input !== undefined) child.stdin.end(input);
-    child.stdin.on('error', () => {});                // ignore EPIPE if the program exits early
+    if (input !== undefined) child.stdin?.end(input);
+    child.stdin?.on('error', () => {});               // ignore EPIPE if the program exits early
   });
 }
 
 // trailing-whitespace-insensitive line compare (the common judge default)
-function normalize(s) {
+export function normalize(s: string): string {
   return s.replace(/\r\n/g, '\n').split('\n').map((l) => l.replace(/\s+$/, '')).join('\n').replace(/\n+$/, '');
 }
 
-function verdictFromRun(r, expected) {
+export function verdictFromRun(r: Pick<RunResult, 'code' | 'stdout'>, expected: string): string {
   if (r.code === 124) return 'time_limit_exceeded';
   if (r.code === 137) return 'memory_limit_exceeded';
   if (r.code !== 0) return 'runtime_error';
   return normalize(r.stdout) === normalize(expected) ? 'accepted' : 'wrong_answer';
 }
 
-async function judgeSubmission(submissionId) {
+export async function judgeSubmission(submissionId: bigint | string | number): Promise<void> {
   const id = BigInt(submissionId);
   const submission = await prisma.submissions.findUnique({ where: { id } });
   if (!submission) return;
@@ -62,6 +82,9 @@ async function judgeSubmission(submissionId) {
     prisma.languages.findUnique({ where: { id: submission.language_id } }),
     prisma.test_cases.findMany({ where: { problem_id: submission.problem_id }, orderBy: { order_index: 'asc' } }),
   ]);
+  // FKs make these unreachable in practice; a clear throw beats a TypeError if they ever aren't.
+  if (!problem || !language) throw new Error(`submission ${id} references a missing problem or language`);
+
   const srcName = SOURCE_FILE[language.name];
   if (!srcName) throw new Error(`no source-filename mapping for language "${language.name}"`);
 
@@ -101,7 +124,7 @@ async function judgeSubmission(submissionId) {
     // ponytail: assumes GNU coreutils `timeout` (exit 124 on TLE); busybox/Alpine returns
     // 143 and would mis-map to runtime_error — keep language images glibc-based.
     const timeoutSec = String(problem.time_limit_ms / 1000);
-    const perTest = [];
+    const perTest: TestResultRow[] = [];
     let overall = 'accepted';
     let maxRuntime = 0;
     for (const tc of testCases) {
@@ -126,7 +149,12 @@ async function judgeSubmission(submissionId) {
 }
 
 // wipe any prior results (safe to re-judge), write per-test rows, set the submission verdict
-async function finalize(submission, status, perTest, { compiler_output = null, runtime_ms = null } = {}) {
+async function finalize(
+  submission: submissions,
+  status: string,
+  perTest: TestResultRow[],
+  { compiler_output = null, runtime_ms = null }: { compiler_output?: string | null; runtime_ms?: number | null } = {}
+): Promise<void> {
   await prisma.$transaction([
     prisma.submission_test_results.deleteMany({ where: { submission_id: submission.id } }),
     ...perTest.map((r) => prisma.submission_test_results.create({ data: { submission_id: submission.id, ...r } })),
@@ -138,11 +166,9 @@ async function finalize(submission, status, perTest, { compiler_output = null, r
 }
 
 // atomically grab the oldest queued submission (queued -> judging). Safe for >1 worker.
-async function claimNext() {
+export async function claimNext(): Promise<bigint | null> {
   const next = await prisma.submissions.findFirst({ where: { status: 'queued' }, orderBy: { submitted_at: 'asc' } });
   if (!next) return null;
   const claimed = await prisma.submissions.updateMany({ where: { id: next.id, status: 'queued' }, data: { status: 'judging' } });
   return claimed.count === 1 ? next.id : null;
 }
-
-module.exports = { judgeSubmission, claimNext, normalize, verdictFromRun };

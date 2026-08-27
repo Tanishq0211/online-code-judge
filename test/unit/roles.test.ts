@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert');
-const { isPrivileged } = require('../../src/lib/roles');
+import { test } from 'node:test';
+import assert from 'node:assert';
+import { isPrivileged } from '../../src/lib/roles';
 
 test('isPrivileged: only moderator and admin', () => {
   assert.strictEqual(isPrivileged({ user: { role: 'admin' } }), true);

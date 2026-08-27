@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022"],
+    // node16 = CommonJS emit with Node's real resolution rules. TypeScript 7 removed
+    // the old "commonjs" + moduleResolution:"node" pairing; package.json has no
+    // "type":"module", so files still compile to require()/exports.
+    "module": "node16",
+
+    "rootDir": ".",
+    "outDir": "dist",
+
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmitOnError": true,
+    "sourceMap": true,
+
+    // The generated Prisma client ships a 468 KB index.d.ts plus vendored runtime
+    // typings; checking them on every build costs seconds and finds nothing.
+    "skipLibCheck": true
+  },
+
+  // The five scripts/test-*.js files are legacy manual smoke scripts, superseded by
+  // test/ in Phase 8. Left as untyped JS on purpose rather than migrated.
+  "include": [
+    "src/**/*.ts",
+    "scripts/judge-worker.ts",
+    "scripts/make-admin.ts",
+    "test/**/*.ts"
+  ],
+
+  // src/generated is emitted by `prisma generate` — imported for its .d.ts, never compiled.
+  "exclude": ["node_modules", "dist", "src/generated"]
+}

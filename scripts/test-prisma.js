@@ -1,5 +1,5 @@
 require('dotenv').config()
-const prisma = require('../src/lib/prisma')
+const prisma = require('../dist/src/lib/prisma').default // built output (npm run build)
 async function main() {
   const count = await prisma.users.count()
   console.log(`������✅ Connected! Found ${count} user(s) in the database.`)

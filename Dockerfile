@@ -13,21 +13,26 @@ RUN apt-get update \
 
 WORKDIR /app
 
-# Deps first for layer caching. All deps (incl. nodemon) so the dev compose
-# override can hot-reload from this same image.
+# Deps first for layer caching. All deps (incl. typescript/tsx) so the build below
+# works and the dev compose override can hot-reload from this same image.
 COPY package*.json ./
 RUN npm ci
 
 # Copy source, then generate the Prisma client (it's gitignored, so it must be
-# built here). .dockerignore keeps host node_modules / src/generated out.
+# built here). .dockerignore keeps host node_modules / src/generated / dist out.
 # prisma.config.ts resolves env('DATABASE_URL') at load; generate never connects,
 # so a throwaway URL just satisfies that check. The real URL is injected at runtime.
 COPY . .
 RUN DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public" npx prisma generate
+
+# Compile TS -> dist/ (build also copies src/generated into dist so the emitted
+# `require('../generated/prisma')` resolves). test/** is .dockerignore'd, so only
+# src + scripts compile here.
+RUN npm run build
 
 # API runs unprivileged; the judge service overrides `user: root` in compose so it
 # can reach the docker socket.
 USER node
 
 EXPOSE 3000
-CMD ["node", "src/index.js"]
+CMD ["node", "dist/src/index.js"]

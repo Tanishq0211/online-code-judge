@@ -1,10 +1,10 @@
 // Exercises the real authLimiter middleware on a throwaway app, so hammering it
-// can't eat into the shared auth limit used by api.test.js.
-const { test } = require('node:test');
-const assert = require('node:assert');
-const express = require('express');
-const request = require('supertest');
-const { authLimiter } = require('../../src/middleware/rateLimit');
+// can't eat into the shared auth limit used by api.test.ts.
+import { test } from 'node:test';
+import assert from 'node:assert';
+import express from 'express';
+import request from 'supertest';
+import { authLimiter } from '../../src/middleware/rateLimit';
 
 test('authLimiter → 429 after the limit, with RateLimit-* headers', async () => {
   const app = express();

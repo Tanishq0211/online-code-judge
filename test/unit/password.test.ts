@@ -1,6 +1,6 @@
-const { test } = require('node:test');
-const assert = require('node:assert');
-const { hash, compare } = require('../../src/utils/password');
+import { test } from 'node:test';
+import assert from 'node:assert';
+import { hash, compare } from '../../src/utils/password';
 
 test('hash then compare: right password matches, wrong does not', async () => {
   const h = await hash('correct horse battery');

@@ -1,12 +1,13 @@
 // Long-running judge worker: polls for queued submissions and judges them one at a time.
-//   node scripts/judge-worker.js   (or: npm run judge)
+//   node dist/scripts/judge-worker.js   (or: npm run judge)
 // Requires Docker + the language images pulled (docker pull python:3.12 gcc:13 eclipse-temurin:21).
-require('dotenv').config({ quiet: true });
-const prisma = require('../src/lib/prisma');
-const { claimNext, judgeSubmission } = require('../src/services/judge');
+import 'dotenv/config'; // must stay first: src/lib/prisma reads DATABASE_URL at import time
+import prisma from '../src/lib/prisma';
+import { claimNext, judgeSubmission } from '../src/services/judge';
 
 const POLL_MS = 2000;
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 let running = true;
 process.on('SIGINT', () => { running = false; }); // finish the current job, then exit
 
@@ -15,8 +16,8 @@ process.on('SIGINT', () => { running = false; }); // finish the current job, the
 (async () => {
   console.log(`judge worker started; polling every ${POLL_MS}ms`);
   while (running) {
-    let id = null;
-    try { id = await claimNext(); } catch (e) { console.error('claim error:', e.message); }
+    let id: bigint | null = null;
+    try { id = await claimNext(); } catch (e) { console.error('claim error:', msg(e)); }
     if (!id) { await sleep(POLL_MS); continue; }
 
     console.log('judging submission', id.toString());
@@ -24,7 +25,7 @@ process.on('SIGINT', () => { running = false; }); // finish the current job, the
       await judgeSubmission(id);
       console.log('done', id.toString());
     } catch (e) {
-      console.error('judge error for', id.toString(), '-', e.message);
+      console.error('judge error for', id.toString(), '-', msg(e));
       // never leave a claimed row stuck in 'judging'
       await prisma.submissions.update({
         where: { id }, data: { status: 'internal_error', completed_at: new Date() },

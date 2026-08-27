@@ -1,13 +1,14 @@
 // Prometheus metrics. Default process/Node metrics + an HTTP-duration histogram.
-// Exposed at GET /metrics (see index.js). ponytail: add domain counters
+// Exposed at GET /metrics (see index.ts). ponytail: add domain counters
 // (submissions_total, verdicts_total{status}) when you want judge dashboards —
 // this is just the HTTP + runtime baseline.
-const client = require('prom-client');
+import { Registry, Histogram, collectDefaultMetrics } from 'prom-client';
+import type { Request, Response, NextFunction } from 'express';
 
-const register = new client.Registry();
-client.collectDefaultMetrics({ register });
+const register = new Registry();
+collectDefaultMetrics({ register });
 
-const httpDuration = new client.Histogram({
+const httpDuration = new Histogram({
   name: 'http_request_duration_seconds',
   help: 'HTTP request duration in seconds',
   labelNames: ['method', 'route', 'status'],
@@ -18,7 +19,7 @@ const httpDuration = new client.Histogram({
 // Times every request. Labels by the *matched route pattern* (e.g. /api/problems/:id,
 // not /api/problems/123) so param values don't blow up label cardinality; unmatched
 // requests fall back to the mount path or a constant for the same reason.
-function metricsMiddleware(req, res, next) {
+function metricsMiddleware(req: Request, res: Response, next: NextFunction): void {
   const end = httpDuration.startTimer();
   res.on('finish', () => {
     const route = req.route ? req.baseUrl + req.route.path : req.baseUrl || 'unmatched';
@@ -27,4 +28,4 @@ function metricsMiddleware(req, res, next) {
   next();
 }
 
-module.exports = { register, metricsMiddleware };
+export { register, metricsMiddleware };

@@ -80,7 +80,7 @@ services:
   judge:
     build: .
     image: online-code-judge:latest
-    command: node scripts/judge-worker.js
+    command: node dist/scripts/judge-worker.js
     user: root
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123}@postgres:5432/${POSTGRES_DB:-online_judge}?schema=public

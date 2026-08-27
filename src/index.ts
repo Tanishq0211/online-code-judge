@@ -1,23 +1,24 @@
-require('dotenv').config();
+import 'dotenv/config';
 
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const pinoHttp = require('pino-http');
+import express from 'express';
+import cors from 'cors';
+import helmet from 'helmet';
+import pinoHttp from 'pino-http';
 
-const logger = require('./lib/logger');
-const { register: metricsRegister, metricsMiddleware } = require('./lib/metrics');
-const { globalLimiter, authLimiter, submitLimiter } = require('./middleware/rateLimit');
+import logger from './lib/logger';
+import { register as metricsRegister, metricsMiddleware } from './lib/metrics';
+import { globalLimiter, authLimiter, submitLimiter } from './middleware/rateLimit';
 
-const asyncHandler = require('./middleware/asyncHandler');
-const errorHandler = require('./middleware/errorHandler');
+import prisma from './lib/prisma';
+import asyncHandler from './middleware/asyncHandler';
+import errorHandler from './middleware/errorHandler';
 
-const { register, login, refresh } = require('./controllers/authController');
-const authenticate = require('./middleware/authenticate');
-const authorize = require('./middleware/authorize');
-const problemsRouter = require('./routes/problems');
-const submissionsRouter = require('./routes/submissions');
-const { body, validationResult } = require('express-validator');
+import { register, login, refresh } from './controllers/authController';
+import authenticate from './middleware/authenticate';
+import authorize from './middleware/authorize';
+import problemsRouter from './routes/problems';
+import submissionsRouter from './routes/submissions';
+import { body } from 'express-validator';
 
 const app = express();
 
@@ -41,7 +42,6 @@ app.get(
 app.get(
   '/health/ready',
   asyncHandler(async (req, res) => {
-    const prisma = require('./lib/prisma');
     try {
       await prisma.$queryRaw`SELECT 1`;
       res.json({ status: 'ready', db: 'ok' });
@@ -133,7 +133,13 @@ app.use('/api/problems', problemsRouter);
 // Mount submission router under /api/submissions (POST is the expensive judge path)
 app.use(
   '/api/submissions',
-  (req, res, next) => (req.method === 'POST' ? submitLimiter(req, res, next) : next()),
+  (req, res, next) => {
+    if (req.method === 'POST') {
+      submitLimiter(req, res, next);
+      return;
+    }
+    next();
+  },
   submissionsRouter
 );
 
@@ -145,9 +151,8 @@ app.get(
   authenticate,
   authorize(['user', 'moderator', 'admin']), // any authenticated role
   asyncHandler(async (req, res) => {
-    const prisma = require('./lib/prisma');
     const freshUser = await prisma.users.findUnique({
-      where: { id: BigInt(req.user.userId) },
+      where: { id: BigInt(req.user!.userId) },
       select: {
         id: true,
         username: true,
@@ -160,7 +165,8 @@ app.get(
     });
 
     if (!freshUser) {
-      return res.status(404).json({ error: 'User not found' });
+      res.status(404).json({ error: 'User not found' });
+      return;
     }
     const userJson = {
       ...freshUser,
@@ -176,7 +182,6 @@ app.get(
   authenticate,
   authorize('admin'),
   asyncHandler(async (req, res) => {
-    const prisma = require('./lib/prisma');
     const userCount = await prisma.users.count();
     // You can return any admin‑only stats here
     res.json({ adminOnly: true, userCount });
@@ -188,10 +193,10 @@ app.use(errorHandler);
 
 // ----- Start Server (only when run directly; tests import `app` via supertest) -----
 if (require.main === module) {
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
   app.listen(PORT, () => {
     logger.info(`Server running on http://localhost:${PORT}`);
   });
 }
 
-module.exports = app;
+export default app;

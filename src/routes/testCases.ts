@@ -1,15 +1,16 @@
-const express = require('express');
-const { body, param } = require('express-validator');
+import express, { type Request, type Response, type NextFunction } from 'express';
+import { body, param } from 'express-validator';
 
-const prisma = require('../lib/prisma');
-const asyncHandler = require('../middleware/asyncHandler');
-const authenticate = require('../middleware/authenticate');
-const authorize = require('../middleware/authorize');
-const optionalAuth = require('../middleware/optionalAuth');
-const { isPrivileged } = require('../lib/roles');
-const {
+import prisma from '../lib/prisma';
+import asyncHandler from '../middleware/asyncHandler';
+import authenticate from '../middleware/authenticate';
+import authorize from '../middleware/authorize';
+import optionalAuth from '../middleware/optionalAuth';
+import { isPrivileged } from '../lib/roles';
+import { one } from '../lib/query';
+import {
   listTestCases, createTestCase, updateTestCase, deleteTestCase,
-} = require('../controllers/testCaseController');
+} from '../controllers/testCaseController';
 
 // mergeParams so we can read :slug from the parent problems router.
 const router = express.Router({ mergeParams: true });
@@ -17,10 +18,11 @@ const MUTATE_ROLES = ['moderator', 'admin'];
 
 // Resolve the parent problem from :slug and enforce its visibility.
 // Hidden problems are 404 for non-privileged callers (don't reveal existence).
-async function loadProblem(req, res, next) {
-  const problem = await prisma.problems.findUnique({ where: { slug: req.params.slug } });
+async function loadProblem(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const problem = await prisma.problems.findUnique({ where: { slug: one(req.params.slug) } });
   if (!problem || (!problem.is_public && !isPrivileged(req))) {
-    return res.status(404).json({ error: 'Problem not found' });
+    res.status(404).json({ error: 'Problem not found' });
+    return;
   }
   req.problem = problem;
   next();
@@ -49,4 +51,4 @@ router.post('/', authenticate, authorize(MUTATE_ROLES), asyncHandler(loadProblem
 router.patch('/:id', authenticate, authorize(MUTATE_ROLES), asyncHandler(loadProblem), updateRules, asyncHandler(updateTestCase));
 router.delete('/:id', authenticate, authorize(MUTATE_ROLES), asyncHandler(loadProblem), idRule, asyncHandler(deleteTestCase));
 
-module.exports = router;
+export default router;

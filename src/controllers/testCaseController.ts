@@ -1,20 +1,24 @@
-const prisma = require('../lib/prisma');
-const { validationResult } = require('express-validator');
-const { isPrivileged } = require('../lib/roles');
+import type { Request, Response } from 'express';
+import { validationResult } from 'express-validator';
+
+import prisma from '../lib/prisma';
+import type { Prisma } from '../generated/prisma';
+import { isPrivileged } from '../lib/roles';
+import { one } from '../lib/query';
 
 // Prisma returns BigInt for id/problem_id — JSON can't serialize BigInt.
-function serialize(tc) {
+function serialize<T extends { id: bigint; problem_id: bigint }>(tc: T) {
   return { ...tc, id: tc.id.toString(), problem_id: tc.problem_id.toString() };
 }
 
-// All handlers below assume loadProblem middleware set req.problem.
+// All handlers below assume loadProblem middleware set req.problem (hence req.problem!).
 
 /**
  * GET /api/problems/:slug/test-cases
  * Public: only visible (sample) cases. mod/admin: all cases.
  */
-async function listTestCases(req, res) {
-  const where = { problem_id: req.problem.id };
+export async function listTestCases(req: Request, res: Response): Promise<void> {
+  const where: Prisma.test_casesWhereInput = { problem_id: req.problem!.id };
   if (!isPrivileged(req)) where.is_visible = true; // hidden judging cases never leak
   const rows = await prisma.test_cases.findMany({
     where,
@@ -27,11 +31,14 @@ async function listTestCases(req, res) {
  * POST /api/problems/:slug/test-cases  (moderator/admin)
  * order_index: uses the provided value, else auto-assigns max+1 (DB CHECK requires > 0).
  */
-async function createTestCase(req, res) {
+export async function createTestCase(req: Request, res: Response): Promise<void> {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
-  const problem_id = req.problem.id;
+  const problem_id = req.problem!.id;
   let { order_index } = req.body;
   if (order_index === undefined) {
     const agg = await prisma.test_cases.aggregate({
@@ -42,7 +49,10 @@ async function createTestCase(req, res) {
     const clash = await prisma.test_cases.findUnique({
       where: { problem_id_order_index: { problem_id, order_index } },
     });
-    if (clash) return res.status(409).json({ error: `order_index ${order_index} already used for this problem` });
+    if (clash) {
+      res.status(409).json({ error: `order_index ${order_index} already used for this problem` });
+      return;
+    }
   }
 
   const tc = await prisma.test_cases.create({
@@ -61,28 +71,37 @@ async function createTestCase(req, res) {
  * PATCH /api/problems/:slug/test-cases/:id  (moderator/admin)
  * Partial update, scoped to the parent problem so ids can't cross problems.
  */
-async function updateTestCase(req, res) {
+export async function updateTestCase(req: Request, res: Response): Promise<void> {
   const errors = validationResult(req);
-  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() });
+    return;
+  }
 
-  const id = BigInt(req.params.id);
+  const id = BigInt(one(req.params.id));
   const existing = await prisma.test_cases.findFirst({
-    where: { id, problem_id: req.problem.id },
+    where: { id, problem_id: req.problem!.id },
   });
-  if (!existing) return res.status(404).json({ error: 'Test case not found' });
+  if (!existing) {
+    res.status(404).json({ error: 'Test case not found' });
+    return;
+  }
 
   if (req.body.order_index !== undefined && req.body.order_index !== existing.order_index) {
     const clash = await prisma.test_cases.findUnique({
-      where: { problem_id_order_index: { problem_id: req.problem.id, order_index: req.body.order_index } },
+      where: { problem_id_order_index: { problem_id: req.problem!.id, order_index: req.body.order_index } },
     });
-    if (clash) return res.status(409).json({ error: `order_index ${req.body.order_index} already used for this problem` });
+    if (clash) {
+      res.status(409).json({ error: `order_index ${req.body.order_index} already used for this problem` });
+      return;
+    }
   }
 
-  const data = {};
-  for (const f of ['input', 'expected_output', 'is_visible', 'order_index']) {
+  const data: Record<string, unknown> = {};
+  for (const f of ['input', 'expected_output', 'is_visible', 'order_index'] as const) {
     if (req.body[f] !== undefined) data[f] = req.body[f];
   }
-  const tc = await prisma.test_cases.update({ where: { id }, data });
+  const tc = await prisma.test_cases.update({ where: { id }, data: data as Prisma.test_casesUncheckedUpdateInput });
   res.json({ testCase: serialize(tc) });
 }
 
@@ -92,15 +111,16 @@ async function updateTestCase(req, res) {
  * submission_test_results, so deleting a case drops its historical judge results.
  * Fine pre-submissions (Phase 5); add a deleted_at flag if that history must survive.
  */
-async function deleteTestCase(req, res) {
-  const id = BigInt(req.params.id);
+export async function deleteTestCase(req: Request, res: Response): Promise<void> {
+  const id = BigInt(one(req.params.id));
   const existing = await prisma.test_cases.findFirst({
-    where: { id, problem_id: req.problem.id },
+    where: { id, problem_id: req.problem!.id },
   });
-  if (!existing) return res.status(404).json({ error: 'Test case not found' });
+  if (!existing) {
+    res.status(404).json({ error: 'Test case not found' });
+    return;
+  }
 
   await prisma.test_cases.delete({ where: { id } });
   res.json({ message: 'Test case deleted' });
 }
-
-module.exports = { listTestCases, createTestCase, updateTestCase, deleteTestCase };

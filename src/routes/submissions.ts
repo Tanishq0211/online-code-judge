@@ -1,11 +1,11 @@
-const express = require('express');
-const { body, param, query } = require('express-validator');
+import express from 'express';
+import { body, param, query } from 'express-validator';
 
-const asyncHandler = require('../middleware/asyncHandler');
-const authenticate = require('../middleware/authenticate');
-const {
+import asyncHandler from '../middleware/asyncHandler';
+import authenticate from '../middleware/authenticate';
+import {
   createSubmission, listSubmissions, getSubmission,
-} = require('../controllers/submissionController');
+} from '../controllers/submissionController';
 
 const router = express.Router();
 
@@ -38,4 +38,4 @@ router.post('/', authenticate, createRules, asyncHandler(createSubmission));
 router.get('/', authenticate, listRules, asyncHandler(listSubmissions));
 router.get('/:id', authenticate, idRule, asyncHandler(getSubmission));
 
-module.exports = router;
+export default router;
