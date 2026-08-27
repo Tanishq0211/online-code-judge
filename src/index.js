@@ -3,7 +3,11 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
-const morgan = require('morgan');
+const pinoHttp = require('pino-http');
+
+const logger = require('./lib/logger');
+const { register: metricsRegister, metricsMiddleware } = require('./lib/metrics');
+const { globalLimiter, authLimiter, submitLimiter } = require('./middleware/rateLimit');
 
 const asyncHandler = require('./middleware/asyncHandler');
 const errorHandler = require('./middleware/errorHandler');
@@ -17,13 +21,52 @@ const { body, validationResult } = require('express-validator');
 
 const app = express();
 
-// ----- Global Middleware -----
-app.use(helmet());          // Security headers
-app.use(cors());            // Enable CORS
-app.use(express.json());    // Parse JSON bodies
-app.use(morgan('dev'));     // Request logger
+// ----- Observability (first, so it sees every request incl. ops endpoints) -----
+app.use(helmet());                 // Security headers
+app.use(cors());                   // Enable CORS
+app.use(pinoHttp({ logger }));     // Structured request logging (replaces morgan)
+app.use(metricsMiddleware);        // Prometheus HTTP timing
 
-// ----- Auth Routes -----
+// ----- Ops endpoints (no body parsing / rate limit so probes & scrapes stay cheap) -----
+
+// Liveness: process is up.
+app.get(
+  '/health',
+  asyncHandler(async (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  })
+);
+
+// Readiness: dependencies (DB) are reachable.
+app.get(
+  '/health/ready',
+  asyncHandler(async (req, res) => {
+    const prisma = require('./lib/prisma');
+    try {
+      await prisma.$queryRaw`SELECT 1`;
+      res.json({ status: 'ready', db: 'ok' });
+    } catch (err) {
+      req.log.error({ err }, 'readiness check failed');
+      res.status(503).json({ status: 'unavailable', db: 'down' });
+    }
+  })
+);
+
+// Prometheus scrape target. ponytail: open on localhost — firewall or put behind
+// auth before exposing publicly.
+app.get(
+  '/metrics',
+  asyncHandler(async (req, res) => {
+    res.set('Content-Type', metricsRegister.contentType);
+    res.send(await metricsRegister.metrics());
+  })
+);
+
+// ----- Body parsing + coarse global rate limit (before app routes) -----
+app.use(express.json());    // Parse JSON bodies
+app.use(globalLimiter);     // Per-IP app-wide guard
+
+// ----- Auth Routes (stricter brute-force limiter) -----
 const authRouter = express.Router();
 
 /**
@@ -81,14 +124,18 @@ authRouter.post(
   })
 );
 
-// Mount auth router under /api/auth
-app.use('/api/auth', authRouter);
+// Mount auth router under /api/auth (brute-force limiter in front)
+app.use('/api/auth', authLimiter, authRouter);
 
 // Mount problem router under /api/problems
 app.use('/api/problems', problemsRouter);
 
-// Mount submission router under /api/submissions
-app.use('/api/submissions', submissionsRouter);
+// Mount submission router under /api/submissions (POST is the expensive judge path)
+app.use(
+  '/api/submissions',
+  (req, res, next) => (req.method === 'POST' ? submitLimiter(req, res, next) : next()),
+  submissionsRouter
+);
 
 // ----- Example Protected Routes -----
 
@@ -136,22 +183,11 @@ app.get(
   })
 );
 
-// ----- Health Check (keep existing) -----
-app.get(
-  '/health',
-  asyncHandler(async (req, res) => {
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-    });
-  })
-);
-
 // ----- Central Error Handler (must be last) -----
 app.use(errorHandler);
 
 // ----- Start Server -----
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`���������🚀 Server running on http://localhost:${PORT}`);
+  logger.info(`Server running on http://localhost:${PORT}`);
 });
