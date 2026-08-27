@@ -39,7 +39,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx prisma generate
-      - run: npx prisma db push --skip-generate # schema-first project: create tables, no migration history
+      - run: npx prisma db push # schema-first project: create tables, no migration history
       - run: npm test
       # ponytail: CI covers unit + API integration. The Docker container judge
       # (scripts/test-judge.js) needs Docker-in-Docker + multi-GB language images

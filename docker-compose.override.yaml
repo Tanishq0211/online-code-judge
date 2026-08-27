@@ -1,0 +1,29 @@
+# Dev overrides, auto-merged by `docker compose up`. Live source + hot reload.
+# CHOKIDAR_USEPOLLING makes nodemon's file watching work across the bind mount on
+# Docker Desktop (Windows/macOS), where inotify events don't cross the boundary.
+#
+# For a prod-style run without these overrides:
+#   docker compose -f docker-compose.yaml up -d --build
+
+services:
+  api:
+    command: npm run dev
+    environment:
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - .:/app
+      - /app/node_modules   # keep the image's deps (host's may be wrong-OS or absent)
+      - /app/src/generated  # keep the image's generated prisma client
+
+  judge:
+    command: npx nodemon scripts/judge-worker.js
+    environment:
+      LOG_LEVEL: debug
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/src/generated
+      - /var/run/docker.sock:/var/run/docker.sock
