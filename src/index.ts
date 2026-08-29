@@ -18,6 +18,7 @@ import authenticate from './middleware/authenticate';
 import authorize from './middleware/authorize';
 import problemsRouter from './routes/problems';
 import submissionsRouter from './routes/submissions';
+import languagesRouter from './routes/languages';
 import { body } from 'express-validator';
 
 const app = express();
@@ -129,6 +130,9 @@ app.use('/api/auth', authLimiter, authRouter);
 
 // Mount problem router under /api/problems
 app.use('/api/problems', problemsRouter);
+
+// Mount public language list under /api/languages (read-only, no limiter beyond global)
+app.use('/api/languages', languagesRouter);
 
 // Mount submission router under /api/submissions (POST is the expensive judge path)
 app.use(
