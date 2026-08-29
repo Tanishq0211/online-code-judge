@@ -1,5 +1,5 @@
 import { getRefreshToken, clearRefreshToken } from '../auth/tokenStore';
-import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language, Submission } from './types';
+import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language, Submission, TestResult, SubmissionStatus } from './types';
 
 let accessToken: string | null = null;
 export function setAccessToken(t: string | null) { accessToken = t; }
@@ -91,3 +91,14 @@ export const listLanguages = () => apiFetch<{ data: Language[] }>(`/api/language
 
 export const createSubmission = (body: { problem_id: string; language_id: string; source_code: string }) =>
   apiFetch<{ submission: Submission }>(`/api/submissions`, { method: 'POST', body: JSON.stringify(body) });
+
+export const getSubmission = (id: string) =>
+  apiFetch<{ submission: Submission; testResults: TestResult[] }>(`/api/submissions/${encodeURIComponent(id)}`);
+
+export const listSubmissions = (q: { page?: number; limit?: number; status?: SubmissionStatus | '' }) => {
+  const p = new URLSearchParams();
+  if (q.page) p.set('page', String(q.page));
+  if (q.limit) p.set('limit', String(q.limit));
+  if (q.status) p.set('status', q.status);
+  return apiFetch<Paged<Submission>>(`/api/submissions?${p.toString()}`);
+};
