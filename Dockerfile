@@ -8,7 +8,7 @@ FROM node:20-slim
 # ponytail: docker.io pulls the full engine we don't run — swap for docker-ce-cli
 # or the static docker CLI binary to slim the image.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends docker.io \
+ && apt-get install -y --no-install-recommends docker.io openssl \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

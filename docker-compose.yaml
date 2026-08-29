@@ -39,7 +39,8 @@ services:
   migrate:
     build: .
     image: online-code-judge:latest
-    command: npx prisma db push
+    # push the schema, then reconcile CHECK constraints Prisma can't manage (roles etc.)
+    command: sh -c "npx prisma db push && npx prisma db execute --file database/constraints.sql"
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres123}@postgres:5432/${POSTGRES_DB:-online_judge}?schema=public
     depends_on:
