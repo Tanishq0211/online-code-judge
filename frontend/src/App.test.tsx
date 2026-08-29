@@ -1,12 +1,15 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext';
 import App from './App';
 
-test('renders the not-found stub for an unknown route', () => {
+test('renders the not-found page for an unknown route', () => {
   render(
-    <MemoryRouter initialEntries={['/no-such-route']}>
-      <App />
-    </MemoryRouter>,
+    <AuthProvider>
+      <MemoryRouter initialEntries={['/no-such-route']}>
+        <App />
+      </MemoryRouter>
+    </AuthProvider>,
   );
-  expect(screen.getByTestId('page')).toHaveTextContent('notfound');
+  expect(screen.getByRole('heading', { name: 'Page not found' })).toBeInTheDocument();
 });
