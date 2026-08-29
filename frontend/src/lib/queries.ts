@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import * as api from './api';
 import type { Difficulty } from './types';
 
@@ -13,3 +13,6 @@ export const useTestCases = (slug: string) =>
 
 export const useLanguages = () =>
   useQuery({ queryKey: ['languages'], queryFn: api.listLanguages, staleTime: Infinity });
+
+export const useCreateSubmission = () =>
+  useMutation({ mutationFn: api.createSubmission });

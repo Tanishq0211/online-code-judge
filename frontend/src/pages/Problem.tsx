@@ -1,7 +1,11 @@
-import { useParams, Link } from 'react-router-dom';
-import { useProblem, useTestCases } from '../lib/queries';
+import { useState } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useProblem, useTestCases, useLanguages, useCreateSubmission } from '../lib/queries';
 import { ApiError } from '../lib/api';
+import { useAuth } from '../auth/AuthContext';
 import ErrorState from '../components/ErrorState';
+import LanguagePicker from '../components/LanguagePicker';
+import CodeEditor from '../components/CodeEditor';
 
 function Section({ title, body }: { title: string; body: string | null }) {
   if (!body) return null;
@@ -15,8 +19,14 @@ function Section({ title, body }: { title: string; body: string | null }) {
 
 export default function Problem() {
   const { slug = '' } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const p = useProblem(slug);
   const tc = useTestCases(slug);
+  const langs = useLanguages();
+  const create = useCreateSubmission();
+  const [languageId, setLanguageId] = useState('');
+  const [source, setSource] = useState('');
 
   if (p.isError && (p.error as ApiError)?.status === 404) {
     return (
@@ -59,8 +69,49 @@ export default function Problem() {
         </section>
       )}
 
-      {/* Editor + submit added in Task 7 */}
-      <div data-testid="editor-slot" className="mt-6" />
+      {/* Editor + submit (Task 7) */}
+      <section className="mt-6">
+        <h2 className="font-semibold mb-2">Solution</h2>
+        {!user ? (
+          <p className="text-sm text-gray-500">
+            <Link className="text-blue-600" to={`/login?from=/problems/${slug}`}>Log in to submit</Link>
+          </p>
+        ) : (
+          <>
+            <div className="mb-2 flex items-center gap-2">
+              <LanguagePicker value={languageId} onChange={setLanguageId} />
+            </div>
+            <CodeEditor
+              slug={slug}
+              languageId={languageId}
+              languageName={langs.data?.data.find((l) => l.id === languageId)?.name ?? ''}
+              value={source}
+              onChange={setSource}
+              onRestore={(savedSrc, savedLang) => {
+                if (savedSrc != null) setSource(savedSrc);
+                if (savedLang) setLanguageId(savedLang);
+              }}
+            />
+            <div className="mt-2 flex items-center gap-3">
+              <button
+                className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+                disabled={!languageId || !source.trim() || create.isPending}
+                onClick={() =>
+                  create.mutate(
+                    { problem_id: problem.id, language_id: languageId, source_code: source },
+                    { onSuccess: (r) => navigate(`/submissions/${r.submission.id}`) },
+                  )
+                }
+              >
+                {create.isPending ? 'Submitting…' : 'Submit'}
+              </button>
+              {create.isError && (
+                <span className="text-sm text-red-600">{(create.error as ApiError).message}</span>
+              )}
+            </div>
+          </>
+        )}
+      </section>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { getRefreshToken, clearRefreshToken } from '../auth/tokenStore';
-import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language } from './types';
+import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language, Submission } from './types';
 
 let accessToken: string | null = null;
 export function setAccessToken(t: string | null) { accessToken = t; }
@@ -88,3 +88,6 @@ export const getProblem = (slug: string) =>
 export const listTestCases = (slug: string) =>
   apiFetch<{ data: TestCase[] }>(`/api/problems/${encodeURIComponent(slug)}/test-cases`);
 export const listLanguages = () => apiFetch<{ data: Language[] }>(`/api/languages`);
+
+export const createSubmission = (body: { problem_id: string; language_id: string; source_code: string }) =>
+  apiFetch<{ submission: Submission }>(`/api/submissions`, { method: 'POST', body: JSON.stringify(body) });
