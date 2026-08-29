@@ -16,7 +16,7 @@ describe('apiFetch error normalization', () => {
   });
   it('parses {errors:[]} field shape', async () => {
     mockFetchOnce(400, { errors: [{ path: 'email', msg: 'invalid' }] });
-    const err = await apiFetch('/api/x').catch((e: ApiError) => e);
+    const err = await apiFetch('/api/x').catch((e: unknown) => e) as ApiError;
     expect(err).toBeInstanceOf(ApiError);
     expect(err.fieldErrors.email).toBe('invalid');
   });
