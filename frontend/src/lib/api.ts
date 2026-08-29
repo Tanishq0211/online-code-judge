@@ -1,5 +1,5 @@
 import { getRefreshToken, clearRefreshToken } from '../auth/tokenStore';
-import type { AuthResponse, User } from './types';
+import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language } from './types';
 
 let accessToken: string | null = null;
 export function setAccessToken(t: string | null) { accessToken = t; }
@@ -71,3 +71,20 @@ export const login = (usernameOrEmail: string, password: string) =>
 export const register = (username: string, email: string, password: string) =>
   apiFetch<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, email, password }) });
 export const getMe = () => apiFetch<{ user: User }>('/api/me');
+
+export const listProblems = (q: {
+  page?: number; limit?: number; difficulty?: Difficulty | ''; search?: string;
+}) => {
+  const p = new URLSearchParams();
+  if (q.page) p.set('page', String(q.page));
+  if (q.limit) p.set('limit', String(q.limit));
+  if (q.difficulty) p.set('difficulty', q.difficulty);
+  if (q.search) p.set('search', q.search);
+  return apiFetch<Paged<ProblemSummary>>(`/api/problems?${p.toString()}`);
+};
+export const getProblem = (slug: string) =>
+  apiFetch<{ problem: Problem }>(`/api/problems/${encodeURIComponent(slug)}`);
+// anon sees visible (sample) cases only; backend filters by is_visible.
+export const listTestCases = (slug: string) =>
+  apiFetch<{ data: TestCase[] }>(`/api/problems/${encodeURIComponent(slug)}/test-cases`);
+export const listLanguages = () => apiFetch<{ data: Language[] }>(`/api/languages`);

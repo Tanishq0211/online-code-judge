@@ -28,6 +28,10 @@ export interface TestResult {
   status: SubmissionStatus; runtime_ms: number | null; memory_kb: number | null;
   stdout: string | null; stderr: string | null;
 }
+export interface TestCase {
+  id: string; problem_id: string; input: string; expected_output: string;
+  is_visible: boolean; order_index: number;
+}
 export const TERMINAL_STATUSES: SubmissionStatus[] = [
   'accepted','wrong_answer','time_limit_exceeded','memory_limit_exceeded',
   'runtime_error','compilation_error','internal_error',
