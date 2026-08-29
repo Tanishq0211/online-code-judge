@@ -1,4 +1,5 @@
 import { getRefreshToken, clearRefreshToken } from '../auth/tokenStore';
+import type { AuthResponse, User } from './types';
 
 let accessToken: string | null = null;
 export function setAccessToken(t: string | null) { accessToken = t; }
@@ -64,3 +65,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, _retried
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
+
+export const login = (usernameOrEmail: string, password: string) =>
+  apiFetch<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify({ usernameOrEmail, password }) });
+export const register = (username: string, email: string, password: string) =>
+  apiFetch<AuthResponse>('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, email, password }) });
+export const getMe = () => apiFetch<{ user: User }>('/api/me');
