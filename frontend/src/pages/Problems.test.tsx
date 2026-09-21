@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
@@ -22,6 +22,26 @@ it('renders problem titles and the difficulty filter', async () => {
       <MemoryRouter><Problems /></MemoryRouter>
     </QueryClientProvider>,
   );
-  await waitFor(() => expect(screen.getByText('Two Sum')).toBeInTheDocument());
+  // Stage 4 renders two presentations of the same data: the mobile card list
+  // and the desktop table (CSS decides which shows). jsdom keeps both in the
+  // DOM, so each title appears exactly twice.
+  const table = await waitFor(() => screen.getByRole('table'));
+  expect(within(table).getByText('Two Sum')).toBeInTheDocument();
+  expect(screen.getAllByText('Two Sum')).toHaveLength(2);
   expect(screen.getByText('All difficulties')).toBeInTheDocument();
+});
+
+test('shows a skeleton region (not plain text) while loading', async () => {
+  vi.mocked(api.listProblems).mockReturnValue(new Promise<never>(() => {}));
+  const qc = new QueryClient();
+  render(
+    <QueryClientProvider client={qc}>
+      <MemoryRouter><Problems /></MemoryRouter>
+    </QueryClientProvider>,
+  );
+  // one polite status region with an accessible name; the actual skeletons are
+  // aria-hidden so screen readers hear a single short announcement
+  const status = screen.getByRole('status', { name: 'Loading problems' });
+  expect(status).toBeInTheDocument();
+  expect(screen.getByText('Loading problems…')).toHaveClass('sr-only');
 });

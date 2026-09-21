@@ -11,6 +11,7 @@ vi.mock('./api', () => ({ getSubmission }));
 const sub = (status: SubmissionStatus): Submission => ({
   id: '1', user_id: '1', problem_id: '1', language_id: '1',
   status, runtime_ms: null, memory_kb: null,
+  compiler_output: null, stdout: null, stderr: null,
   submitted_at: '2026-08-29T00:00:00.000Z', completed_at: null,
 });
 const mk = (qc: QueryClient) => ({ children }: { children: ReactNode }) =>

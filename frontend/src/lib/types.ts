@@ -21,6 +21,7 @@ export interface Problem extends ProblemSummary {
 export interface Submission {
   id: string; user_id: string; problem_id: string; language_id: string;
   status: SubmissionStatus; runtime_ms: number | null; memory_kb: number | null;
+  compiler_output: string | null; stdout: string | null; stderr: string | null;
   submitted_at: string; completed_at: string | null; source_code?: string;
 }
 export interface TestResult {

@@ -1,12 +1,18 @@
+import Button from './ui/Button';
+
 export default function Pagination({ page, totalPages, onPage }: {
   page: number; totalPages: number; onPage: (p: number) => void;
 }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center gap-2 mt-4">
-      <button disabled={page <= 1} onClick={() => onPage(page - 1)} className="px-3 py-1 border rounded disabled:opacity-40">Prev</button>
-      <span className="text-sm">Page {page} of {totalPages}</span>
-      <button disabled={page >= totalPages} onClick={() => onPage(page + 1)} className="px-3 py-1 border rounded disabled:opacity-40">Next</button>
-    </div>
+    <nav aria-label="Pagination" className="mt-6 flex items-center gap-3">
+      <Button variant="secondary" size="sm" disabled={page <= 1} onClick={() => onPage(page - 1)}
+        aria-label="Previous page">Prev</Button>
+      <span className="text-sm text-fg-secondary tabular-nums" aria-current="page">
+        Page {page} of {totalPages}
+      </span>
+      <Button variant="secondary" size="sm" disabled={page >= totalPages} onClick={() => onPage(page + 1)}
+        aria-label="Next page">Next</Button>
+    </nav>
   );
 }

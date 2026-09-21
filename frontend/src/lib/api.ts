@@ -1,6 +1,15 @@
 import { getRefreshToken, clearRefreshToken } from '../auth/tokenStore';
 import type { AuthResponse, User, Difficulty, ProblemSummary, Problem, Paged, TestCase, Language, Submission, TestResult, SubmissionStatus } from './types';
 
+/* Deploy-time API prefix (Stage 9). Empty by default: every path below is
+   same-origin "/api/…", which both the Vite dev proxy and the production
+   nginx configuration route to the Express API. Set VITE_API_BASE_URL (e.g.
+   "https://api.example.com" — no trailing slash) only when the SPA is served
+   from a different origin than the API.
+   ⚠ VITE_* variables are compiled into the client bundle and are PUBLIC by
+   design — never place secrets here. See frontend/.env.example. */
+const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '');
+
 let accessToken: string | null = null;
 export function setAccessToken(t: string | null) { accessToken = t; }
 export function getAccessToken() { return accessToken; }
@@ -18,6 +27,27 @@ export class ApiError extends Error {
   }
 }
 
+/** Offline / DNS / CORS: `fetch` rejects instead of resolving. Normalise it to
+    status 0 so callers can tell "can't reach the server" from a backend reply. */
+async function doFetch(path: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(`${API_BASE}${path}`, init);
+  } catch {
+    throw new ApiError(0, 'Network request failed');
+  }
+}
+
+/** A refresh that failed for an auth reason genuinely ends the session; a
+    network blip must not, or a dropped connection logs the user out. */
+const isAuthFailure = (e: unknown) =>
+  e instanceof ApiError && (e.status === 401 || e.status === 403);
+
+function endSession() {
+  clearRefreshToken();
+  setAccessToken(null);
+  onAuthFailure();
+}
+
 async function parseError(res: Response): Promise<ApiError> {
   let body: any = {};
   try { body = await res.json(); } catch { /* non-JSON */ }
@@ -33,7 +63,7 @@ let refreshing: Promise<string> | null = null;
 async function refreshAccess(): Promise<string> {
   const rt = getRefreshToken();
   if (!rt) throw new ApiError(401, 'No refresh token');
-  const res = await fetch('/api/auth/refresh', {
+  const res = await doFetch('/api/auth/refresh', {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken: rt }),
   });
@@ -47,19 +77,19 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}, _retried
   const headers = new Headers(init.headers);
   if (init.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
   if (accessToken) headers.set('Authorization', `Bearer ${accessToken}`);
-  const res = await fetch(path, { ...init, headers });
+  const res = await doFetch(path, { ...init, headers });
   if (res.status === 401 && !_retried && getRefreshToken()) {
     try {
       refreshing ??= refreshAccess().finally(() => { refreshing = null; });
       await refreshing;
-    } catch {
-      clearRefreshToken(); setAccessToken(null); onAuthFailure();
-      throw await parseError(res);
+    } catch (e) {
+      if (isAuthFailure(e)) endSession();   // expired/revoked → really log out
+      throw isAuthFailure(e) ? await parseError(res) : e;   // else surface the network error
     }
     return apiFetch<T>(path, init, true);   // retry ONCE
   }
   if (res.status === 401 && _retried) {     // retried and still 401 → give up
-    clearRefreshToken(); setAccessToken(null); onAuthFailure();
+    endSession();
   }
   if (!res.ok) throw await parseError(res);
   if (res.status === 204) return undefined as T;

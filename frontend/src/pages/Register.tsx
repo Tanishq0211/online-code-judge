@@ -2,6 +2,14 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { ApiError } from '../lib/api';
+import { formErrorMessage } from '../components/ErrorState';
+import { useDocumentTitle } from '../lib/useDocumentTitle';
+import Container from '../components/ui/Container';
+import Card from '../components/ui/Card';
+import Input from '../components/ui/Input';
+import Button from '../components/ui/Button';
+
+const labelCls = 'block text-sm font-medium text-fg-secondary';
 
 export default function Register() {
   const { register } = useAuth();
@@ -9,29 +17,46 @@ export default function Register() {
   const [form, setForm] = useState({ username: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  useDocumentTitle('Register');
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setError(''); setFieldErrors({});
     try { await register(form.username, form.email, form.password); nav('/problems', { replace: true }); }
     catch (err) {
-      if (err instanceof ApiError) { setError(err.message); setFieldErrors(err.fieldErrors); }
-      else setError('Registration failed');
+      setError(formErrorMessage(err));
+      if (err instanceof ApiError) setFieldErrors(err.fieldErrors);
     }
   };
+  const field = (
+    id: string, label: string, autoComplete: string,
+    value: string, onChange: (v: string) => void,
+    fieldError?: string,
+  ) => (
+    <div className="space-y-1">
+      <label htmlFor={id} className={labelCls}>{label}</label>
+      <Input id={id} type={id === 'register-password' ? 'password' : 'text'} autoComplete={autoComplete}
+        placeholder={label.toLowerCase()}
+        aria-invalid={fieldError ? true : undefined}
+        aria-describedby={fieldError ? `${id}-error` : undefined}
+        value={value} onChange={e => onChange(e.target.value)} />
+      {fieldError && <p id={`${id}-error`} role="alert" className="text-xs text-error-fg">{fieldError}</p>}
+    </div>
+  );
   return (
-    <form onSubmit={submit} className="max-w-sm mx-auto p-8 space-y-4">
-      <h1 className="text-xl font-semibold">Register</h1>
-      {error && <p role="alert" className="text-red-600 text-sm">{error}</p>}
-      <input className="border w-full p-2 rounded" placeholder="username"
-        value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} />
-      {fieldErrors.username && <p className="text-red-600 text-xs">{fieldErrors.username}</p>}
-      <input className="border w-full p-2 rounded" placeholder="email"
-        value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
-      {fieldErrors.email && <p className="text-red-600 text-xs">{fieldErrors.email}</p>}
-      <input className="border w-full p-2 rounded" type="password" placeholder="password"
-        value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
-      {fieldErrors.password && <p className="text-red-600 text-xs">{fieldErrors.password}</p>}
-      <button className="bg-blue-600 text-white w-full p-2 rounded">Register</button>
-      <p className="text-sm">Have an account? <Link className="text-blue-600" to="/login">Log in</Link></p>
-    </form>
+    <Container size="narrow" className="py-12">
+      <Card className="p-6">
+        <form onSubmit={submit} className="space-y-4">
+          <h1 className="text-xl">Register</h1>
+          {error && <p role="alert" id="register-error" className="text-sm text-error-fg">{error}</p>}
+          {field('register-username', 'Username', 'username',
+            form.username, v => setForm({ ...form, username: v }), fieldErrors.username)}
+          {field('register-email', 'Email', 'email',
+            form.email, v => setForm({ ...form, email: v }), fieldErrors.email)}
+          {field('register-password', 'Password', 'new-password',
+            form.password, v => setForm({ ...form, password: v }), fieldErrors.password)}
+          <Button type="submit" className="w-full">Register</Button>
+        </form>
+        <p className="mt-4 text-sm text-fg-secondary">Have an account? <Link className="text-accent hover:underline" to="/login">Log in</Link></p>
+      </Card>
+    </Container>
   );
 }

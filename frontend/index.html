@@ -4,7 +4,23 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <meta name="theme-color" content="#f8fafc" />
+    <!-- Fonts are self-hosted from /fonts/ (Stage 9 / ISSUE-007) — no CDN. -->
+    <title>Verdict — Online Judge</title>
+    <script>
+      /* Theme boot (Stage 8/9): must run before first paint to avoid a
+         light→dark flash. Explicit choice wins; otherwise the OS preference.
+         The theme-color meta is synced here and on every later toggle. */
+      (function () {
+        try {
+          var t = localStorage.getItem('theme');
+          var dark = t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          if (dark) document.documentElement.classList.add('dark');
+          var m = document.querySelector('meta[name="theme-color"]');
+          if (m) m.setAttribute('content', dark ? '#020617' : '#f8fafc');
+        } catch (e) { /* no localStorage — stay light */ }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

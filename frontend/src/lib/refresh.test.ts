@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { apiFetch, setAccessToken, setOnAuthFailure } from './api';
-import { setRefreshToken } from '../auth/tokenStore';
+import { setRefreshToken, getRefreshToken } from '../auth/tokenStore';
 
 // fetch mock: 401 on protected calls until access token === 'NEW'; /refresh returns NEW once.
 function makeFetch(opts: { refreshOk: boolean }) {
@@ -42,5 +42,16 @@ describe('refresh', () => {
     const refreshCalls = f.mock.calls.filter(c => String(c[0]).endsWith('/api/auth/refresh'));
     expect(refreshCalls).toHaveLength(1);      // never re-refreshed
     expect(onFail).toHaveBeenCalledOnce();
+  });
+  it('a network failure during refresh keeps the session (offline is not expiry)', async () => {
+    const f = vi.fn(async (url: string) => {
+      if (String(url).endsWith('/api/auth/refresh')) throw new TypeError('Failed to fetch');
+      return { ok: false, status: 401, json: async () => ({ error: 'expired' }) };
+    });
+    vi.stubGlobal('fetch', f);
+    const onFail = vi.fn(); setOnAuthFailure(onFail);
+    await expect(apiFetch('/api/a')).rejects.toMatchObject({ status: 0 });
+    expect(onFail).not.toHaveBeenCalled();
+    expect(getRefreshToken()).toBe('R');
   });
 });
