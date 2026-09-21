@@ -94,5 +94,17 @@ services:
         condition: service_completed_successfully
     restart: unless-stopped
 
+  # Frontend SPA (Stage 9): multi-stage build → static nginx. Serves the
+  # built assets with SPA history fallback and proxies /api to the api
+  # service, so the browser talks to one origin. See frontend/nginx.conf.
+  frontend:
+    build: ./frontend
+    image: online-code-judge-frontend:latest
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
 volumes:
   postgres_data:

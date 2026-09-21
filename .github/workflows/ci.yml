@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main, feature/backend]
+    branches: [main, feature/backend, feature/frontend]
   pull_request:
 
 jobs:
@@ -44,3 +44,23 @@ jobs:
       # ponytail: CI covers unit + API integration. The Docker container judge
       # (scripts/test-judge.js) needs Docker-in-Docker + multi-GB language images
       # and is left out; the judge's pure verdict logic is unit-covered instead.
+
+  # Frontend gates (Stage 9 / ISSUE-003): the same checks the stage workflow
+  # runs locally, against the lockfile. The backend job above is untouched.
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build

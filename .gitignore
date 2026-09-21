@@ -13,3 +13,8 @@ node_modules
 .windsurf
 
 
+
+# Local tooling state (Git Integration Audit, class C) — never commit
+.serena/
+opencode.json
+.freebuff/
