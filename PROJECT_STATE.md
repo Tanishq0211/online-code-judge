@@ -16,25 +16,20 @@
 >
 > **Phase:** Phase 11 — Frontend
 >
-> **Current Stage:** Stage 8 (dark mode) COMPLETE — implementation done,
-> 47/47 tests, all four gates green, **30/30 contrast checks AA in both
-> themes**, browser-verified (system default, toggle, persistence both ways,
-> editor both themes, submission page, responsive dark), report delivered,
-> **approval PENDING**
+> **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED
+> and PUSHED (three-commit plan, §21.10; push verified 2026-09-22, §21.11)
 >
-> **Current Task:** Awaiting user approval for Stage 9 (production config —
-> the final stage)
+> **Current Task:** None. Awaiting the merge decision — merge
+> `feature/frontend` into `main` (§20.4). Do not begin new work.
 >
 > **Branch:** `feature/frontend`
 >
-> **Last known commit:** `54c7b2f` — in sync with `origin/feature/frontend`
+> **Last pushed commit:** `3c9d9e9` — pushed 2026-09-22 22:04 IST
+> (fast-forward `54c7b2f..3c9d9e9`; §21.11). Local carries one unpushed
+> docs commit on top of it.
 >
-> **Working tree:** DIRTY — Stages 1–8 all uncommitted (30 modified tracked
-> files incl. `index.css`, `index.html`, `CodeEditor.tsx`, `Nav.tsx`,
-> `tailwind.config.js`; untracked incl. `theme.ts` + test, `Skeleton.tsx`,
-> `Problem.test.tsx`, `Submission.test.tsx`), plus untracked
-> `PROJECT_STATE.md`, `.serena/`, `opencode.json`. 0 staged.
-> Re-verified 2026-09-13.
+> **Working tree:** CLEAN.
+> Re-verified 2026-09-23.
 >
 > **Last verified:** 2026-09-13 — typecheck PASS; tests PASS (14 files /
 > 49 tests); lint 0 errors / 5 accepted warnings; build PASS (main chunk
@@ -4149,12 +4144,56 @@ verbatim, then executed as the approved **three-commit plan**. No push.
 Each commit was staged explicitly (no `-a`/`-u`), inspected with
 `git diff --cached --name-status` before committing, and verified after.
 All three carry the `Co-Authored-By: Claude` trailer (§20.6 convention).
-`feature/frontend` is now **ahead 3** of `origin/feature/frontend`; **NOT
-pushed** (push remains a separate, ungranted authorisation).
+
+**PUSHED 2026-09-22 (22:04 IST, verified from `git reflog show
+origin/feature/frontend`), after explicit user authorisation:** a fast-forward
+`git push origin feature/frontend` moved `54c7b2f..3c9d9e9`. `origin/
+feature/frontend` now points at `3c9d9e9`; local and remote are in sync
+(0 ahead / 0 behind). Only `feature/frontend` was pushed — `main`,
+`develop`, and `feature/backend` were NOT modified, no history was
+rewritten, and the working tree remained clean throughout.
 
 **Next action:** the merge decision — merge `feature/frontend` into `main`
 (per §20.4: merge `feature/frontend` ONLY; `feature/backend` is a patch-id
-duplicate), and whether to push. Both await explicit user authorisation.
+duplicate). Awaits explicit user authorisation.
+
+## 21.11 SESSION-2026-09-23 — takeover session: push status corrected in this document
+
+Continuation session. The previous session's push (§21.10) could not update
+this file, because the docs commit carrying it (`3c9d9e9`) predates the push.
+All facts below were read from the repository before writing — no hash or
+date reconstructed from memory (§24.4):
+
+- `git rev-parse HEAD` = `git rev-parse origin/feature/frontend` =
+  `3c9d9e9e286b71d7ab0f4ed48d1e2a6a199a9ce6`.
+- `git reflog show origin/feature/frontend`: `update by push` at
+  **2026-09-22 22:04:09 +0530**, moving `54c7b2f..3c9d9e9` (fast-forward;
+  the earlier entry is the 2026-08-29 push of `54c7b2f`).
+- `git branch -vv`: `main` and `develop` both at `29c3cc9`,
+  `feature/backend` at `d1e65a3` — none modified by the push; no history
+  rewritten; the working tree was clean before this session's edit.
+
+Corrections made (documentation only — this file, nothing else):
+
+- §21.10's push paragraph now carries the real push date. It briefly said
+  "PUSHED 2026-09-14", which is impossible (the three commits were authored
+  2026-09-21/22) — an invented date, exactly the failure mode §24.4 forbids.
+- §24.1's state block and the header handoff block were completed (they
+  still said CURRENT COMMIT `54c7b2f` / tree DIRTY / Stage 9 approval
+  pending, contradicting the §21.10 push paragraph above).
+- §24.2 item 1 marked SUPERSEDED for the same reason.
+- §20.1–§20.2, §2 and the per-session records §21.1–§21.9 are deliberately
+  LEFT AS DATED SNAPSHOTS (ledger rule §24.4 — append, do not rewrite).
+
+The single docs-only commit `docs: update frontend push status` lands
+directly on `3c9d9e9` and is **NOT pushed** — at session end local
+`feature/frontend` is 1 ahead of `origin/feature/frontend`.
+
+**NOT done this session:** no push, no merge, no rebase/history rewrite; no
+source, test, Docker, CI, package or tooling changes; no frontend gates
+re-run (no code changed — the 2026-09-13 verification in §21.9 remains the
+last gate run); no new phase started. The merge decision remains blocked on
+explicit user authorisation.
 
 ---
 
@@ -4381,30 +4420,29 @@ do), and §23 (what you must not break). Everything else is reference.**
 ## 24.1 State block
 
 ```
-CURRENT PHASE     Phase 11 COMPLETE — all nine stages APPROVED and COMMITTED
-                  (three-commit plan, §21.10): ccb2bb5 (application), b243d86
-                  (infrastructure), and the docs commit carrying this file.
-                  Branch is ahead 3, NOT pushed.
-CURRENT TASK      None in progress. Blocked on user approval of Stage 9. On
-                  approval, the programme's remaining decision is the commit /
-                  merge strategy for the entire uncommitted Stages 1–9 body of
-                  work (see §20.4 for the merge guidance: merge
-                  feature/frontend only; feature/backend is redundant).
+CURRENT PHASE     Phase 11 COMPLETE — all nine stages APPROVED, COMMITTED,
+                  and PUSHED. Three-commit plan (§21.10): ccb2bb5 (application),
+                  b243d86 (infrastructure), 3c9d9e9 (docs); origin/
+                  feature/frontend fast-forwarded 54c7b2f..3c9d9e9 on
+                  2026-09-22; local now carries the later docs corrections
+                  unpushed (§21.11). Only feature/frontend was pushed; main,
+                  develop, feature/backend untouched; tree clean.
+CURRENT TASK      None in progress. Phase 11 is closed: all nine stages
+                  APPROVED, COMMITTED (three-commit plan, §21.10) and PUSHED
+                  (2026-09-22, §21.11). The remaining decision is the merge
+                  of feature/frontend into main (see §20.4 for the merge
+                  guidance: merge feature/frontend only; feature/backend is
+                  redundant) — awaits explicit user authorisation.
 CURRENT BRANCH    feature/frontend
-CURRENT COMMIT    54c7b2f8bf4332526b19ae68c9fcba84631fee0b
-                  "feat(frontend): app shell (layout, nav, 404) + auth-aware navigation"
-                  0 ahead / 0 behind origin/feature/frontend
-WORKING TREE      DIRTY — Stages 1 through 9, ALL uncommitted (REQ-09):
-                  33 modified tracked files (1507+/264−), 35 untracked paths
-                  (incl. NEW Stage 9 files frontend/Dockerfile,
-                  frontend/nginx.conf, frontend/.env.example,
-                  frontend/public/fonts/*.woff2 ×7; NEW Stage 5/8/9 test files;
-                  ui/ 12 files; EmptyState, ErrorBoundary×2,
-                  useDocumentTitle, theme.ts; plus PROJECT_STATE.md,
-                  .serena/, .freebuff/, opencode.json). 0 staged.
-                  See §24.3 before staging anything — it lists the original
-                  Stage 1/2 set; extend it with the Stage 5–9 untracked files
-                  above at commit time.
+CURRENT COMMIT    3c9d9e9 is the last commit shared with
+                  origin/feature/frontend (fast-forward push
+                  54c7b2f..3c9d9e9, 2026-09-22 22:04 IST, §21.11); local
+                  carries the unpushed docs correction of §21.11 directly
+                  on top of it
+WORKING TREE      CLEAN (after this session's docs correction commit).
+                  The §24.3 staging trap is now HISTORICAL: every Stage 1–9
+                  path was committed in ccb2bb5/b243d86; its untracked table
+                  is kept as record only.
 LAST VERIFIED     2026-09-13 (§21.9) — Stage 9 gates PASS (typecheck; tests
                   14 files / 49 tests; lint 0 err + the 5 accepted warnings;
                   build — main chunk 309.51 kB / 94.57 gzip after splitting).
@@ -4421,24 +4459,21 @@ SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
                   BASE_URL contract; frontend/Dockerfile + nginx.conf +
                   compose frontend service; theme-color sync; logged-out nav
                   320px overflow found in the production sweep and FIXED.
-KNOWN BLOCKERS    (1) Stage 9 approval — the final programme gate.
-                  (2) No commit authorisation — the whole of Stages 1–9
-                  awaits one; staging must include ALL untracked frontend
-                  paths (see above and §24.3).
-                  (3) Fresh-clone seed gap (ISSUE-014) unchanged.
-NEXT ACTION       Ask the user to approve or reject Stage 9. On approval, the
-                  next work is NOT a new stage: it is the commit strategy the
-                  user chooses for the entire uncommitted Phase 11 body
-                  (logically separable commits per stage, or fewer) + the
-                  merge of feature/frontend into main (§20.4: merge
-                  feature/frontend ONLY; feature/backend is a duplicate by
-                  patch-id). No new code until the user decides. See §24.2.
+KNOWN BLOCKERS    (1) No merge authorisation — feature/frontend → main
+                  (§20.4) awaits explicit user authorisation.
+                  (2) Fresh-clone seed gap (ISSUE-014) unchanged.
+NEXT ACTION       Await the user's merge decision: merge feature/frontend
+                  into main (§20.4: merge feature/frontend ONLY;
+                  feature/backend is a duplicate by patch-id). No new code
+                  until the user decides. See §24.2.
 ```
 
 ## 24.2 What to do, in order
 
-1. **Do not begin new work.** Stage 9 is complete and AWAITING APPROVAL —
-   with it, all nine stages of Phase 11 are implemented. §19.2 lists the
+1. **Do not begin new work.** ~~Stage 9 is complete and AWAITING APPROVAL —
+   with it, all nine stages of Phase 11 are implemented.~~ **SUPERSEDED — see
+   §21.10 and §21.11:** Stage 9 was APPROVED, all nine stages are COMMITTED
+   and PUSHED. §19.2 lists the
    only things available without new user input: maintaining this document,
    answering questions, and verification that changes nothing.
 2. **Do not opportunistically start a P1 item "while waiting."** §22.5. A P1 fix
