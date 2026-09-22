@@ -16,17 +16,20 @@
 >
 > **Phase:** Phase 11 — Frontend
 >
-> **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED
-> and PUSHED (three-commit plan, §21.10; push verified 2026-09-22, §21.11)
+> **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED,
+> PUSHED, and MERGED into `main` locally (--no-ff, §21.12)
 >
-> **Current Task:** None. Awaiting the merge decision — merge
-> `feature/frontend` into `main` (§20.4). Do not begin new work.
+> **Current Task:** None. The merge commit awaits push authorisation —
+> `main` is strictly ahead of `origin/main` and NOT pushed. Do not begin
+> new work.
 >
-> **Branch:** `feature/frontend`
+> **Branch:** `main` (merge session; `feature/frontend` remains at
+> `83b6051`, in sync with origin, NOT deleted)
 >
-> **Last pushed commit:** `3c9d9e9` — pushed 2026-09-22 22:04 IST
-> (fast-forward `54c7b2f..3c9d9e9`; §21.11). Local carries one unpushed
-> docs commit on top of it.
+> **Commits:** main = merge `064e774` (parents `29c3cc9` + `83b6051`)
+> with this session's docs record on top — LOCAL ONLY, NOT pushed;
+> `feature/frontend` = `83b6051` = `origin/feature/frontend`
+> (pushed 2026-09-23 00:46 IST, §21.11–§21.12)
 >
 > **Working tree:** CLEAN.
 > Re-verified 2026-09-23.
@@ -4195,6 +4198,41 @@ re-run (no code changed — the 2026-09-13 verification in §21.9 remains the
 last gate run); no new phase started. The merge decision remains blocked on
 explicit user authorisation.
 
+## 21.12 SESSION-2026-09-23 — feature/frontend MERGED into main locally (--no-ff)
+
+Follow-on to §21.11 in the same continuation session, after a read-only
+merge/integration audit was delivered and the user authorised exactly one
+operation: the local --no-ff merge. Facts verified from the repository:
+
+- Pre-merge: main = origin/main = `29c3cc9`; feature/frontend =
+  origin/feature/frontend = `83b6051`; develop = `29c3cc9`; feature/backend
+  = `d1e65a3`; working tree clean.
+- Audit facts: `main...feature/frontend` = 0 ahead / 27 behind (main a
+  strict ancestor); `git merge-tree --write-tree` simulated result tree
+  equalled the feature/frontend tree, `07261f60…` — zero conflicts,
+  predicted before the merge was authorised.
+- Merge executed on main: **`064e7747000e20092400b31f396c3886c3e30b24`**
+  (`064e774`), "ort" strategy, no conflicts — first parent `29c3cc9`
+  (previous main), second parent `83b6051` (feature/frontend), subject
+  "Merge branch 'feature/frontend' — backend Phases 1–10 + frontend
+  Phase 11 (Stages 1–9)".
+- Post-merge verified: `git diff --exit-code feature/frontend main` clean
+  — main's tree is `07261f60…` exactly as simulated; 136 files changed,
+  +20555 vs the old main; the merge itself introduced no additional
+  content beyond the branch; working tree clean.
+- **NOT pushed:** origin/main remains `29c3cc9`. develop,
+  feature/backend, and feature/database were NOT touched; feature/frontend
+  was NOT deleted (kept; REQ-36).
+- The session is currently ON branch main. This document's own update is
+  a separate docs commit on main — also NOT pushed, so main remains
+  strictly ahead of origin/main (merge commit + this document's commit).
+
+**NOT done this session:** no push of main; no develop/feature/backend/
+feature/database changes; no rebase/squash/amend/history rewrite; the
+§20.4 hash typo (`1e5e5da` should read `7a3ff63`, found during the audit)
+and the stray committed `server.log` were deliberately LEFT for a future
+authorised housekeeping commit; no new phase started.
+
 ---
 
 # 22. CURRENT TODO LIST
@@ -4420,29 +4458,25 @@ do), and §23 (what you must not break). Everything else is reference.**
 ## 24.1 State block
 
 ```
-CURRENT PHASE     Phase 11 COMPLETE — all nine stages APPROVED, COMMITTED,
-                  and PUSHED. Three-commit plan (§21.10): ccb2bb5 (application),
-                  b243d86 (infrastructure), 3c9d9e9 (docs); origin/
-                  feature/frontend fast-forwarded 54c7b2f..3c9d9e9 on
-                  2026-09-22; local now carries the later docs corrections
-                  unpushed (§21.11). Only feature/frontend was pushed; main,
-                  develop, feature/backend untouched; tree clean.
-CURRENT TASK      None in progress. Phase 11 is closed: all nine stages
-                  APPROVED, COMMITTED (three-commit plan, §21.10) and PUSHED
-                  (2026-09-22, §21.11). The remaining decision is the merge
-                  of feature/frontend into main (see §20.4 for the merge
-                  guidance: merge feature/frontend only; feature/backend is
-                  redundant) — awaits explicit user authorisation.
-CURRENT BRANCH    feature/frontend
-CURRENT COMMIT    3c9d9e9 is the last commit shared with
-                  origin/feature/frontend (fast-forward push
-                  54c7b2f..3c9d9e9, 2026-09-22 22:04 IST, §21.11); local
-                  carries the unpushed docs correction of §21.11 directly
-                  on top of it
-WORKING TREE      CLEAN (after this session's docs correction commit).
-                  The §24.3 staging trap is now HISTORICAL: every Stage 1–9
-                  path was committed in ccb2bb5/b243d86; its untracked table
-                  is kept as record only.
+CURRENT PHASE     Phase 11 COMPLETE and MERGED — all nine stages APPROVED,
+                  COMMITTED (three-commit plan, §21.10), PUSHED (§21.11),
+                  and merged into main with --no-ff on 2026-09-23 (§21.12).
+                  origin/feature/frontend = 83b6051 (in sync); origin/main
+                  still at 29c3cc9 — the merge is LOCAL ONLY, not pushed.
+CURRENT TASK      None in progress. The remaining decision is whether to
+                  push main (local merge commit 064e774) — awaits explicit
+                  user authorisation. No new code until then.
+CURRENT BRANCH    main (switched from feature/frontend for the merge)
+CURRENT COMMIT    064e7747000e20092400b31f396c3886c3e30b24 (064e774)
+                  "Merge branch 'feature/frontend' — backend Phases 1–10 +
+                  frontend Phase 11 (Stages 1–9)" — parents 29c3cc9 (old
+                  main) + 83b6051 (feature/frontend); tree identical to
+                  feature/frontend (07261f60…); 136 files, +20555; this
+                  session's unpushed docs record (§21.12) sits directly on
+                  top of it. NOT pushed: origin/main remains 29c3cc9.
+WORKING TREE      CLEAN. The §24.3 staging trap is HISTORICAL: every
+                  Stage 1–9 path was committed in ccb2bb5/b243d86; its
+                  untracked table is kept as record only.
 LAST VERIFIED     2026-09-13 (§21.9) — Stage 9 gates PASS (typecheck; tests
                   14 files / 49 tests; lint 0 err + the 5 accepted warnings;
                   build — main chunk 309.51 kB / 94.57 gzip after splitting).
@@ -4459,13 +4493,13 @@ SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
                   BASE_URL contract; frontend/Dockerfile + nginx.conf +
                   compose frontend service; theme-color sync; logged-out nav
                   320px overflow found in the production sweep and FIXED.
-KNOWN BLOCKERS    (1) No merge authorisation — feature/frontend → main
-                  (§20.4) awaits explicit user authorisation.
+KNOWN BLOCKERS    (1) No push authorisation — main's merge commit is
+                  local only (origin/main at 29c3cc9).
                   (2) Fresh-clone seed gap (ISSUE-014) unchanged.
-NEXT ACTION       Await the user's merge decision: merge feature/frontend
-                  into main (§20.4: merge feature/frontend ONLY;
-                  feature/backend is a duplicate by patch-id). No new code
-                  until the user decides. See §24.2.
+NEXT ACTION       Await the user's decision on pushing main. feature/
+                  frontend is fully pushed and kept (REQ-36: do not delete
+                  branches without authorisation). No new code until the
+                  user decides. See §24.2.
 ```
 
 ## 24.2 What to do, in order
