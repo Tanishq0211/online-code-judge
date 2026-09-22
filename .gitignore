@@ -1,0 +1,20 @@
+.env
+.env.backup
+
+/src/generated/prisma
+
+dist
+
+node_modules
+
+.claude
+
+.agents
+.windsurf
+
+
+
+# Local tooling state (Git Integration Audit, class C) — never commit
+.serena/
+opencode.json
+.freebuff/

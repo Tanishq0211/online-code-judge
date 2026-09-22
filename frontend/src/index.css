@@ -1,0 +1,196 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Self-hosted fonts (Stage 9 / ISSUE-007) — latin subsets, woff2, served from
+   /fonts/ by the same origin (or the production nginx image). No third-party
+   CDN dependency. Files: IBM Plex Sans 400/500/600/700, JetBrains Mono
+   400/500/600 — both under the SIL Open Font License; unicode-range limits
+   each file to its latin subset, so other scripts fall back to system fonts. */
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'IBM Plex Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/ibm-plex-sans-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/jetbrains-mono-600-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Design tokens — RGB triplets so Tailwind can apply <alpha-value>.
+   Light-mode only for now; a `.dark` override lands in Stage 8. */
+:root {
+  --bg: 248 250 252;            /* slate-50   */
+  --surface: 255 255 255;       /* white      */
+  --elevated: 255 255 255;      /* white (raised) */
+  --border: 226 232 240;        /* slate-200  */
+  --border-strong: 203 213 225; /* slate-300  */
+
+  --fg: 15 23 42;               /* slate-900  */
+  --fg-secondary: 71 85 105;    /* slate-600  */
+  --fg-muted: 100 116 139;      /* slate-500  */
+
+  --accent: 4 120 87;           /* emerald-700 */
+  --accent-hover: 6 95 70;      /* emerald-800 */
+  --accent-fg: 255 255 255;
+  --accent-subtle: 236 253 245; /* emerald-50  */
+
+  --success: 22 163 74;         /* green-600  */
+  --success-fg: 22 101 52;      /* green-800  */
+  --success-subtle: 220 252 231;/* green-100  */
+
+  --warning: 217 119 6;         /* amber-600  */
+  --warning-fg: 146 64 14;      /* amber-800  */
+  --warning-subtle: 254 243 199;/* amber-100  */
+
+  --error: 220 38 38;           /* red-600    */
+  --error-fg: 153 27 27;        /* red-800    */
+  --error-subtle: 254 226 226;  /* red-100    */
+
+  --info: 2 132 199;            /* sky-600    */
+  --info-fg: 7 89 133;          /* sky-800    */
+  --info-subtle: 224 242 254;   /* sky-100    */
+
+  --ring: 4 120 87;             /* = accent   */
+
+  /* CodeMirror surface variables (Stage 8). The editor theme in
+     CodeEditor.tsx can only take literal CSS strings, so it references these
+     vars instead — the one mechanism that lets the editor follow the theme. */
+  --cm-bg: 255 255 255;
+  --cm-fg: 15 23 42;
+  --cm-muted: 100 116 139;
+  --cm-border: 226 232 240;
+  --cm-active-line: 248 250 252;
+  --cm-accent: 4 120 87;
+  --cm-gutter-fg: 100 116 139;
+  --cm-gutter-active-fg: 71 85 105;
+  --cm-keyword: 4 120 87;       /* emerald-700 */
+  --cm-string: 7 89 133;        /* sky-800     */
+  --cm-number: 180 83 9;        /* amber-700   */
+  --cm-comment: 100 116 139;    /* slate-500   */
+}
+
+/* Dark theme (Stage 8) — ADR-013 mechanism: same variable names, dark values.
+   Not an inversion: surfaces go slate-950/900, text slate-100/400, accents
+   shift to the -500/-400 steps and badge pairs to -300-on--950 so contrast
+   holds (measured in the Stage 8 audit). --error stays red-600 in BOTH themes
+   so the danger button's white text passes AA in each; inline error text uses
+   text-error-fg instead. */
+.dark {
+  --bg: 2 6 23;                 /* slate-950  */
+  --surface: 15 23 42;          /* slate-900  */
+  --elevated: 15 23 42;         /* slate-900  */
+  --border: 30 41 59;           /* slate-800  */
+  --border-strong: 51 65 85;    /* slate-700  */
+
+  --fg: 241 245 249;            /* slate-100  */
+  --fg-secondary: 148 163 184;  /* slate-400  */
+  --fg-muted: 148 163 184;      /* slate-400  */
+
+  --accent: 16 185 129;         /* emerald-500 */
+  --accent-hover: 52 211 153;   /* emerald-400 */
+  --accent-fg: 2 6 23;          /* slate-950 — dark text on the bright accent */
+  --accent-subtle: 2 44 34;     /* emerald-950 */
+
+  --success: 22 163 74;         /* green-600 (kept — borders/graphics) */
+  --success-fg: 134 239 172;    /* green-300  */
+  --success-subtle: 5 46 22;    /* green-950  */
+
+  --warning: 217 119 6;         /* amber-600 (kept) */
+  --warning-fg: 252 211 77;     /* amber-300  */
+  --warning-subtle: 69 26 3;    /* amber-950  */
+
+  --error: 220 38 38;           /* red-600 (kept — danger button bg) */
+  --error-fg: 252 165 165;      /* red-300   */
+  --error-subtle: 69 10 10;     /* red-950   */
+
+  --info: 2 132 199;            /* sky-600 (kept) */
+  --info-fg: 125 211 252;       /* sky-300   */
+  --info-subtle: 8 47 73;       /* sky-950   */
+
+  --ring: 16 185 129;           /* = accent  */
+
+  --cm-bg: 2 6 23;
+  --cm-fg: 226 232 240;         /* slate-200 */
+  --cm-muted: 100 116 139;
+  --cm-border: 30 41 59;
+  --cm-active-line: 15 23 42;   /* slate-900 */
+  --cm-accent: 52 211 153;      /* emerald-400 */
+  --cm-gutter-fg: 71 85 105;    /* slate-600 */
+  --cm-gutter-active-fg: 148 163 184;
+  --cm-keyword: 52 211 153;     /* emerald-400 */
+  --cm-string: 125 211 252;     /* sky-300     */
+  --cm-number: 252 211 77;      /* amber-300   */
+  --cm-comment: 100 116 139;    /* slate-500   */
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; }
+  body { @apply bg-bg text-fg font-sans antialiased; }
+  h1, h2, h3, h4, h5, h6 { @apply font-semibold tracking-tight text-fg; }
+  code, kbd, samp, pre { @apply font-mono; }
+  ::selection { @apply bg-accent/20; }
+
+  /* Bare text links get no focus style from the primitives — give every anchor
+     the same visible focus ring the ui/ components have. */
+  a {
+    @apply rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1 focus-visible:ring-offset-bg;
+  }
+
+  /* Honour the OS reduced-motion setting; the only animations in the app are
+     color transitions and the Button loading spinner. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
