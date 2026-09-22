@@ -17,17 +17,18 @@
 > **Phase:** Phase 11 — Frontend
 >
 > **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED,
-> PUSHED, and MERGED into `main` locally (--no-ff, §21.12)
+> PUSHED, MERGED into `main` (--no-ff), and main PUSHED (§21.12 + addendum)
 >
-> **Current Task:** None. The merge commit awaits push authorisation —
-> `main` is strictly ahead of `origin/main` and NOT pushed. Do not begin
-> new work.
+> **Current Task:** None. Phase 11 is fully integrated and published.
+> Awaiting the user's direction. Do not begin new work.
 >
 > **Branch:** `main` (merge session; `feature/frontend` remains at
 > `83b6051`, in sync with origin, NOT deleted)
 >
 > **Commits:** main = merge `064e774` (parents `29c3cc9` + `83b6051`)
-> with this session's docs record on top — LOCAL ONLY, NOT pushed;
+> + docs record `124940a`, both PUSHED — origin/main = `124940a`
+> (fast-forward `29c3cc9..124940a`, 2026-09-23 01:03 IST, §21.12
+> addendum); this correction sits unpushed on top;
 > `feature/frontend` = `83b6051` = `origin/feature/frontend`
 > (pushed 2026-09-23 00:46 IST, §21.11–§21.12)
 >
@@ -4224,14 +4225,27 @@ operation: the local --no-ff merge. Facts verified from the repository:
   feature/backend, and feature/database were NOT touched; feature/frontend
   was NOT deleted (kept; REQ-36).
 - The session is currently ON branch main. This document's own update is
-  a separate docs commit on main — also NOT pushed, so main remains
-  strictly ahead of origin/main (merge commit + this document's commit).
+  a separate docs commit on main — ~~also NOT pushed~~ **superseded by
+  the addendum below** (both commits were subsequently pushed).
 
-**NOT done this session:** no push of main; no develop/feature/backend/
+**NOT done this session:** ~~no push of main~~ (superseded — see the
+addendum below); no develop/feature/backend/
 feature/database changes; no rebase/squash/amend/history rewrite; the
 §20.4 hash typo (`1e5e5da` should read `7a3ff63`, found during the audit)
 and the stray committed `server.log` were deliberately LEFT for a future
 authorised housekeeping commit; no new phase started.
+
+**ADDENDUM — main PUSHED (same continuation session, 2026-09-23):** after
+an explicit user authorisation covering exactly one operation, `git push
+origin main` ran and succeeded — fast-forward `29c3cc9..124940a` (`main ->
+main`, no force; verified: `origin/main` reflog entry "update by push" at
+2026-09-23 01:03:52 +0530, its first update since 2026-07-15). origin/main
+= `124940a`; local main and origin/main synchronised (0 ahead / 0 behind);
+origin/HEAD = `124940a`. Exactly one ref moved: feature/frontend
+(`83b6051`), develop (`29c3cc9`), feature/backend (`d1e65a3`), and
+feature/database (`a742167`) all unchanged; working tree clean. This
+addendum itself is the following docs-only correction (`docs: record main
+push`) and is NOT yet pushed at the time of its commit.
 
 ---
 
@@ -4458,22 +4472,23 @@ do), and §23 (what you must not break). Everything else is reference.**
 ## 24.1 State block
 
 ```
-CURRENT PHASE     Phase 11 COMPLETE and MERGED — all nine stages APPROVED,
-                  COMMITTED (three-commit plan, §21.10), PUSHED (§21.11),
-                  and merged into main with --no-ff on 2026-09-23 (§21.12).
-                  origin/feature/frontend = 83b6051 (in sync); origin/main
-                  still at 29c3cc9 — the merge is LOCAL ONLY, not pushed.
-CURRENT TASK      None in progress. The remaining decision is whether to
-                  push main (local merge commit 064e774) — awaits explicit
-                  user authorisation. No new code until then.
+CURRENT PHASE     Phase 11 COMPLETE, MERGED, and PUBLISHED — all nine
+                  stages APPROVED, COMMITTED (three-commit plan, §21.10),
+                  PUSHED (§21.11), merged into main with --no-ff on
+                  2026-09-23 (§21.12), and main PUSHED (fast-forward
+                  29c3cc9..124940a, §21.12 addendum). origin/main =
+                  origin/HEAD = 124940a; 0 ahead / 0 behind.
+CURRENT TASK      None in progress. Phase 11 is closed end-to-end.
+                  Awaiting the user's direction; no new code until
+                  instructed.
 CURRENT BRANCH    main (switched from feature/frontend for the merge)
-CURRENT COMMIT    064e7747000e20092400b31f396c3886c3e30b24 (064e774)
-                  "Merge branch 'feature/frontend' — backend Phases 1–10 +
-                  frontend Phase 11 (Stages 1–9)" — parents 29c3cc9 (old
-                  main) + 83b6051 (feature/frontend); tree identical to
-                  feature/frontend (07261f60…); 136 files, +20555; this
-                  session's unpushed docs record (§21.12) sits directly on
-                  top of it. NOT pushed: origin/main remains 29c3cc9.
+CURRENT COMMIT    124940a ("docs: record local merge of feature/frontend
+                  into main") is the pushed tip: origin/main = origin/HEAD
+                  = 124940a. The merge itself is 064e774 (parents 29c3cc9
+                  + 83b6051; tree identical to feature/frontend,
+                  07261f60…; 136 files, +20555). This document's own
+                  correction (docs: record main push, §21.12 addendum)
+                  sits unpushed directly on top of 124940a.
 WORKING TREE      CLEAN. The §24.3 staging trap is HISTORICAL: every
                   Stage 1–9 path was committed in ccb2bb5/b243d86; its
                   untracked table is kept as record only.
@@ -4493,13 +4508,13 @@ SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
                   BASE_URL contract; frontend/Dockerfile + nginx.conf +
                   compose frontend service; theme-color sync; logged-out nav
                   320px overflow found in the production sweep and FIXED.
-KNOWN BLOCKERS    (1) No push authorisation — main's merge commit is
-                  local only (origin/main at 29c3cc9).
+KNOWN BLOCKERS    (1) This docs correction commit is itself unpushed
+                  (origin/main = 124940a until it is pushed).
                   (2) Fresh-clone seed gap (ISSUE-014) unchanged.
-NEXT ACTION       Await the user's decision on pushing main. feature/
-                  frontend is fully pushed and kept (REQ-36: do not delete
-                  branches without authorisation). No new code until the
-                  user decides. See §24.2.
+NEXT ACTION       Await the user's direction — e.g. authorise pushing
+                  this docs correction, or open the P1 queue (§22.2).
+                  Nothing is authorised yet. feature/frontend is fully
+                  pushed and kept (REQ-36).
 ```
 
 ## 24.2 What to do, in order
