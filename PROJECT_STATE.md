@@ -17,7 +17,8 @@
 > **Phase:** Phase 11 — Frontend
 >
 > **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED,
-> PUSHED, MERGED into `main` (--no-ff), and main PUSHED (§21.12 + addendum)
+> PUSHED, MERGED into `main` (--no-ff), and main FULLY PUBLISHED (§21.12
+> + addendum, §21.13, §21.14)
 >
 > **Current Task:** None. Phase 11 is fully integrated and published.
 > Awaiting the user's direction. Do not begin new work.
@@ -26,27 +27,30 @@
 > `83b6051`, in sync with origin, NOT deleted)
 >
 > **Commits:** main = merge `064e774` (parents `29c3cc9` + `83b6051`)
-> + docs record `124940a` + docs correction `c1e5f58`, ALL PUSHED —
-> origin/main = origin/HEAD = `c1e5f58` (fast-forward `29c3cc9..124940a`
-> 2026-09-23 01:03 IST, then `124940a..c1e5f58` 01:20 IST; §21.12
-> addendum + §21.13); `feature/frontend` = `83b6051` =
+> + docs record `124940a` + docs correction `c1e5f58` + housekeeping
+> `df11dcb`, ALL PUSHED — origin/main = origin/HEAD = `df11dcb`
+> (fast-forward `29c3cc9..124940a` 2026-09-23 01:03 IST, then
+> `124940a..c1e5f58` 01:20 IST, then `c1e5f58..df11dcb` 12:24 IST;
+> §21.12 addendum, §21.13, §21.14); `feature/frontend` = `83b6051` =
 > `origin/feature/frontend` (pushed 2026-09-23 00:46 IST,
-> §21.11–§21.12). The §21.13 housekeeping record below sits in a NEW
-> local commit on top of `c1e5f58`, not yet pushed at the time of its
-> commit.
+> §21.11–§21.12). The §21.14 final-sync record below is the content
+> of the docs commit at the top of main.
 >
 > **Working tree:** CLEAN.
 > Re-verified 2026-09-23.
 >
-> **Last verified:** 2026-09-13 — typecheck PASS; tests PASS (14 files /
-> 49 tests); lint 0 errors / 5 accepted warnings; build PASS (main chunk
-> 309.51 kB / 94.57 gzip — the >500 kB warning now refers only to the lazy
-> CodeEditor chunk, its genuine size). Contrast: 30/30 pairs ≥ 4.5:1 AA
-> (light lowest 4.55, dark lowest 4.83). Production verified against the
-> real nginx container: all routes, API proxy, self-hosted fonts, both
-> themes, theme-color sync, editor lazy-load, 404, 320px no overflow in
-> both auth states (one logged-out nav overflow found and fixed during the
-> sweep).
+> **Last verified:** 2026-09-23 (final health audit, §21.14) — frontend
+> typecheck PASS; tests PASS (14 files / 49 tests); lint 0 errors / 5
+> accepted warnings; build PASS (main chunk 309.51 kB / 94.57 gzip — the
+> >500 kB warning now refers only to the lazy CodeEditor chunk, its
+> genuine size); backend typecheck/build PASS and tests 16/16 PASS with
+> the Postgres stack running; compose config valid; no tracked secrets.
+> 2026-09-13 (§21.9) Stage 9 gates + production sweep remain on record:
+> contrast 30/30 pairs ≥ 4.5:1 AA (light lowest 4.55, dark lowest 4.83);
+> production verified against the real nginx container: all routes, API
+> proxy, self-hosted fonts, both themes, theme-color sync, editor
+> lazy-load, 404, 320px no overflow in both auth states (one logged-out
+> nav overflow found and fixed during the sweep).
 >
 > **Next action:** Await user approval of Stage 9. Do not begin new work.
 > Do not commit.
@@ -4298,6 +4302,44 @@ no branch touched; no push performed in this session.
   (`29c3cc9`), feature/backend (`d1e65a3`), feature/database (`a742167`) all
   untouched.
 
+## 21.14 SESSION-2026-09-23 — final documentation synchronization (post-audit)
+
+Authorised single docs operation + push, following the read-only final repository
+health audit of 2026-09-23. No source, config, CI, Docker, `.gitignore`, or branch
+changes; no history rewritten; dated historical records left as-is.
+
+- **Trigger:** the audit found the document's current-state blocks one commit
+  behind reality — they still described `c1e5f58` as the pushed tip and the
+  §21.13 housekeeping commit as unpushed, because `df11dcb` was committed before
+  its own push. (INV-18: the repository wins; the document gets corrected.)
+- **Facts used (all verified from Git, no invented dates):** `git push origin main`
+  fast-forward `c1e5f58..df11dcb`, reflog "update by push" at 2026-09-23
+  12:24:18 +0530; `main` = `origin/main` = `origin/HEAD` = `df11dcb`.
+- **Corrections made:** header CURRENT HANDOFF (Current Stage push clause;
+  Commits push sequence `29c3cc9..124940a` → `124940a..c1e5f58` →
+  `c1e5f58..df11dcb`; Last verified); §24.1 (CURRENT PHASE, CURRENT COMMIT,
+  LAST VERIFIED, KNOWN BLOCKERS — the stale "housekeeping commit is itself
+  unpushed" item removed, seed gap and open P1 queue kept, NEXT ACTION now
+  points to user direction / §22.2 rather than a pending push).
+- **Preserved as history:** §21.12 addendum and §21.13 bodies — their "not yet
+  pushed at the time of its commit" claims are temporally scoped and stay true;
+  §20.2/§20.3 dated snapshots; §22 preamble; §24.2 SUPERSEDED approval gates.
+- **Audit evidence recorded:** frontend typecheck/lint/tests/build PASS
+  (14 files / 49 tests; lint 0 errors + 5 accepted warnings; main chunk
+  309.51 kB / 94.57 gzip); backend typecheck/build PASS and tests 16/16 PASS
+  with the Postgres stack running — A/B-proving the earlier 13/16 failures
+  environmental (Prisma `ECONNREFUSED`, stack down); compose config validates;
+  no tracked secrets; `server.log` untracked and ignored; patch-id of
+  `7a3ff63` = `d1e65a3` (`a41f6338…`); merge `064e774` parents verified
+  (29c3cc9 + 83b6051); no history rewrite (origin/main reflog: fast-forward
+  "update by push" entries only).
+- **State at the time of this record's commit:** this final-sync commit sits
+  directly on top of `df11dcb` and is NOT YET PUSHED at the time of its commit
+  (its push is pre-authorized as part of the same operation); origin/main =
+  `df11dcb`; working tree clean; feature/frontend (`83b6051`), develop
+  (`29c3cc9`), feature/backend (`d1e65a3`), feature/database (`a742167`) all
+  untouched.
+
 ---
 
 # 22. CURRENT TODO LIST
@@ -4527,48 +4569,56 @@ CURRENT PHASE     Phase 11 COMPLETE, MERGED, and PUBLISHED — all nine
                   stages APPROVED, COMMITTED (three-commit plan, §21.10),
                   PUSHED (§21.11), merged into main with --no-ff on
                   2026-09-23 (§21.12), main PUSHED (fast-forward
-                  29c3cc9..124940a, §21.12 addendum), and its docs
-                  correction `c1e5f58` PUSHED too (fast-forward
-                  124940a..c1e5f58, §21.13). origin/main = origin/HEAD =
-                  c1e5f58; 0 ahead / 0 behind.
+                  29c3cc9..124940a, §21.12 addendum), docs correction
+                  `c1e5f58` PUSHED (fast-forward 124940a..c1e5f58,
+                  §21.13), and housekeeping `df11dcb` PUSHED
+                  (fast-forward c1e5f58..df11dcb, §21.14).
+                  origin/main = origin/HEAD = df11dcb; 0 ahead / 0 behind.
 CURRENT TASK      None in progress. Phase 11 is closed end-to-end.
                   Awaiting the user's direction; no new code until
                   instructed.
 CURRENT BRANCH    main (switched from feature/frontend for the merge)
-CURRENT COMMIT    c1e5f58 ("docs: record main push") is the pushed tip:
-                  origin/main = origin/HEAD = c1e5f58 (fast-forward
-                  124940a..c1e5f58, 2026-09-23 01:20 IST). The merge
-                  itself is 064e774 (parents 29c3cc9 + 83b6051; tree
+CURRENT COMMIT    df11dcb ("chore: repository housekeeping and state
+                  cleanup") is the pushed tip: origin/main = origin/HEAD
+                  = df11dcb (fast-forward c1e5f58..df11dcb,
+                  2026-09-23 12:24 IST). Behind it: docs correction
+                  c1e5f58, which recorded 124940a, which recorded the
+                  merge 064e774 (parents 29c3cc9 + 83b6051; tree
                   identical to feature/frontend, 07261f60…; 136 files,
-                  +20555), recorded by 124940a, whose own status was
-                  recorded by c1e5f58. The §21.13 housekeeping record
-                  sits in a NEW local commit on top of c1e5f58.
+                  +20555). df11dcb itself carried the §21.13
+                  housekeeping record below.
 WORKING TREE      CLEAN. The §24.3 staging trap is HISTORICAL: every
                   Stage 1–9 path was committed in ccb2bb5/b243d86; its
                   untracked table is kept as record only.
-LAST VERIFIED     2026-09-13 (§21.9) — Stage 9 gates PASS (typecheck; tests
-                  14 files / 49 tests; lint 0 err + the 5 accepted warnings;
-                  build — main chunk 309.51 kB / 94.57 gzip after splitting).
-                  PRODUCTION verified: frontend image built and served via
-                  nginx on the compose network; all routes incl. deep links,
-                  API proxy, self-hosted fonts, both themes + theme-color
-                  sync, editor lazy-load, 404, 320px no overflow in both auth
-                  states. Source and bundle audited: no secrets, no CDN, no
-                  console.log, no stray localhost. compose config valid; CI
-                  YAML valid.
+LAST VERIFIED     2026-09-23 (§21.14 final health audit) — frontend gates
+                  PASS (typecheck; tests 14 files / 49 tests; lint 0 err +
+                  the 5 accepted warnings; build — main chunk 309.51 kB /
+                  94.57 gzip); backend typecheck/build PASS, tests 16/16
+                  PASS with the Postgres stack running; compose config
+                  valid; no tracked secrets. 2026-09-13 (§21.9) Stage 9
+                  gates + PRODUCTION verification remain on record:
+                  frontend image built and served via nginx on the compose
+                  network; all routes incl. deep links, API proxy,
+                  self-hosted fonts, both themes + theme-color sync,
+                  editor lazy-load, 404, 320px no overflow in both auth
+                  states. Source and bundle audited: no secrets, no CDN,
+                  no console.log, no stray localhost. CI YAML valid.
 VERIFIED THIS     CodeEditor lazy-loaded (ISSUE-002 RESOLVED); fonts
 SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
                   feature/frontend trigger (ISSUE-003 RESOLVED); VITE_API_
                   BASE_URL contract; frontend/Dockerfile + nginx.conf +
                   compose frontend service; theme-color sync; logged-out nav
                   320px overflow found in the production sweep and FIXED.
-KNOWN BLOCKERS    (1) The §21.13 housekeeping commit is itself unpushed
-                  (origin/main = c1e5f58 until it is pushed).
-                  (2) Fresh-clone seed gap (ISSUE-014) unchanged.
-NEXT ACTION       Await the user's direction — e.g. authorise pushing
-                  the §21.13 housekeeping commit, or open the P1 queue
-                  (§22.2). Nothing is authorised yet. feature/frontend
-                  is fully pushed and kept (REQ-36).
+KNOWN BLOCKERS    (1) Fresh-clone seed gap (ISSUE-014) unchanged —
+                  database/init/ and database/seeds/ are both empty.
+                  (2) P1 queue open (§22.2): TODO-011 status-vocabulary
+                  reconciliation is next in impact order (TODO-010's
+                  guard landed; TODO-012 resolved).
+NEXT ACTION       Await the user's direction — e.g. open the P1 queue
+                  (§22.2) or another gated task. Nothing new is
+                  authorised yet. Everything built so far is published:
+                  origin/main = df11dcb. feature/frontend is fully
+                  pushed and kept (REQ-36).
 ```
 
 ## 24.2 What to do, in order
