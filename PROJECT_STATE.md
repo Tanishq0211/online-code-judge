@@ -26,11 +26,14 @@
 > `83b6051`, in sync with origin, NOT deleted)
 >
 > **Commits:** main = merge `064e774` (parents `29c3cc9` + `83b6051`)
-> + docs record `124940a`, both PUSHED — origin/main = `124940a`
-> (fast-forward `29c3cc9..124940a`, 2026-09-23 01:03 IST, §21.12
-> addendum); this correction sits unpushed on top;
-> `feature/frontend` = `83b6051` = `origin/feature/frontend`
-> (pushed 2026-09-23 00:46 IST, §21.11–§21.12)
+> + docs record `124940a` + docs correction `c1e5f58`, ALL PUSHED —
+> origin/main = origin/HEAD = `c1e5f58` (fast-forward `29c3cc9..124940a`
+> 2026-09-23 01:03 IST, then `124940a..c1e5f58` 01:20 IST; §21.12
+> addendum + §21.13); `feature/frontend` = `83b6051` =
+> `origin/feature/frontend` (pushed 2026-09-23 00:46 IST,
+> §21.11–§21.12). The §21.13 housekeeping record below sits in a NEW
+> local commit on top of `c1e5f58`, not yet pushed at the time of its
+> commit.
 >
 > **Working tree:** CLEAN.
 > Re-verified 2026-09-23.
@@ -2242,7 +2245,7 @@ or hygiene debt · **P3** cosmetic / deferred.
 | ISSUE-007 | P2 | **RESOLVED (Stage 9, uncommitted)** | Fonts loaded from the Google CDN — 7 latin woff2 files self-hosted in public/fonts, CDN links removed |
 | ISSUE-008 | P2 | **RESOLVED (Stage 6, uncommitted)** | `CodeEditor` `if (value)` guard cannot clear a saved draft |
 | ISSUE-009 | P3 | OPEN | Empty `backend/`, `docker/`, `worker/` directories mislead |
-| ISSUE-010 | P2 | OPEN | `server.log` is tracked in git |
+| ISSUE-010 | P2 | **RESOLVED (housekeeping 2026-09-23, §21.13)** | `server.log` is tracked in git |
 | ISSUE-011 | P1 | OPEN | `/metrics` is unauthenticated |
 | ISSUE-012 | P3 | OPEN | Stale JSDoc advertises a `role?` field that is ignored |
 | ISSUE-013 | P1 | **RESOLVED** | `users_role_check` omitted `'moderator'` → Postgres 23514 |
@@ -2447,6 +2450,10 @@ perpetually-conflicting diffs, grows the repo, and risks committing whatever the
 (pino redaction covers `authorization` and `password`, but not everything).
 **Fix:** `git rm --cached server.log` + add to `.gitignore`. **Requires explicit
 authorization** — it is an index change.
+**RESOLVED (housekeeping session 2026-09-23, §21.13):** contents verified as
+pure nodemon runtime output (no source, config, or secrets), then removed with
+`git rm server.log` (index + disk); `.gitignore` gained the root-anchored rule
+`/server.log`.
 
 ### ISSUE-011 — `/metrics` is unauthenticated (P1 before any exposure)
 `src/index.ts:58` mounts `/metrics` **before** `express.json()` and before every
@@ -4245,7 +4252,51 @@ origin/HEAD = `124940a`. Exactly one ref moved: feature/frontend
 (`83b6051`), develop (`29c3cc9`), feature/backend (`d1e65a3`), and
 feature/database (`a742167`) all unchanged; working tree clean. This
 addendum itself is the following docs-only correction (`docs: record main
-push`) and is NOT yet pushed at the time of its commit.
+push`) — ~~NOT yet pushed at the time of its commit~~ **superseded by
+§21.13**: it was pushed immediately afterwards (fast-forward
+`124940a..c1e5f58`, no force; reflog "update by push" at
+2026-09-23 01:20:08 +0530; origin/main = origin/HEAD = `c1e5f58`).
+
+## 21.13 SESSION-2026-09-23 — authorised housekeeping: hash typo, `server.log`, stale push claims
+
+One controlled maintenance pass on published main, executed as a single commit
+(`chore: repository housekeeping and state cleanup`). Scope was exactly three
+surfaces — `PROJECT_STATE.md`, `.gitignore`, and the removal of the verified
+generated `server.log`. Zero source, test, Docker, CI, Prisma, or package changes;
+no branch touched; no push performed in this session.
+
+- **Hash typo corrected.** §24.7 trap 7 claimed `d1e65a3` duplicates `1e5e5da`;
+  the only such commit in history is `7a3ff63` (§20.4: identical patch-id
+  `a41f6338…`). Corrected in place; the §21.12 note that recorded the typo's
+  discovery deliberately keeps the old string as history.
+- **`server.log` removed — ISSUE-010 RESOLVED, TODO-024 DONE.** Verified before
+  removal: tracked at HEAD, 970 B; contents are pure nodemon 3.1.14 runtime
+  output (an `npm run dev` redirect — start/exit banners, dotenvx notice, HTTP
+  access lines carrying status codes and durations only, NUL padding, which is
+  why grep classified it as binary). No application source, configuration, or
+  secrets. Removed with `git rm server.log` (index + working tree); `.gitignore`
+  gained the root-anchored rule `/server.log` (narrow — no broad `*.log`).
+- **Stale push-status claims corrected.** The header block, §24.1 (CURRENT
+  PHASE, CURRENT COMMIT, KNOWN BLOCKERS, NEXT ACTION), and the §21.12 addendum
+  tail described the `c1e5f58` docs correction as still unpushed. Verified via
+  `git reflog show origin/main --date=iso`: "update by push" at
+  2026-09-23 01:20:08 +0530, fast-forward `124940a..c1e5f58` — origin/main =
+  origin/HEAD = `c1e5f58`, 0 ahead / 0 behind. Dated historical records (the
+  §21.12 session body) were left as written per the ledger rules.
+- **Verification gates run on this tree.** Frontend: typecheck PASS; lint
+  0 errors (+ the 5 documented accepted warnings); tests 14 files / 49 tests
+  PASS; build PASS (main chunk 309.51 kB / 94.57 gzip — unchanged from §24.1).
+  Backend: typecheck PASS; build PASS; `npm test` 13 pass / 3 fail — the three
+  failures are the DB-dependent integration tests (`/health/ready`,
+  register→login→/api/me, GET /api/languages) erroring with Prisma
+  `ECONNREFUSED` because the Postgres stack was not running. Environmental and
+  pre-existing (TODO-001's recurring condition), not caused by this pass; no
+  code was modified in response.
+- **State at the time of this record's commit:** local main = `c1e5f58` + this
+  housekeeping commit on top; origin/main still `c1e5f58` (nothing pushed since
+  01:20 IST); working tree clean; feature/frontend (`83b6051`), develop
+  (`29c3cc9`), feature/backend (`d1e65a3`), feature/database (`a742167`) all
+  untouched.
 
 ---
 
@@ -4288,7 +4339,7 @@ told to, and in what order — it is not a work queue to start draining.
 | TODO-021 | Decide and document the response to ISSUE-021 (hidden-input recovery via `stdout`). ⚠ Do **not** fix it by dropping hidden-test rows from the response — the verdict list would then disagree with the submission's overall status | ISSUE-021, ADR-005 |
 | TODO-022 | ~~Commit the `CodeEditor` draft-clearing fix~~ **OBSOLETE as written** — the fix is now part of Stage 6 (ISSUE-008 RESOLVED 2026-09-12); what remains is the standing commit prohibition: commit Stage 6's editor work when a commit is authorised | ISSUE-008 |
 | TODO-023 | Constrain CORS — `cors()` with no options allows any origin | ISSUE-016 |
-| TODO-024 | Untrack `server.log` and add it to `.gitignore` | ISSUE-010 |
+| TODO-024 | ~~Untrack `server.log` and add it to `.gitignore`~~ **DONE (housekeeping 2026-09-23, §21.13)** | ISSUE-010 |
 | TODO-025 | ~~Self-host the two webfonts~~ **RESOLVED (Stage 9, uncommitted)** — 7 latin woff2 files in public/fonts + @font-face; CDN removed (ISSUE-007) | ISSUE-007 (Stage 9) |
 | TODO-026 | ~~Reduce the >500 kB bundle~~ **RESOLVED (Stage 9, uncommitted)** — CodeEditor lazy-split; main chunk 925→309 kB; the lazy chunk's 615 kB is CodeMirror's genuine size | ISSUE-002 (Stage 9) |
 
@@ -4475,20 +4526,23 @@ do), and §23 (what you must not break). Everything else is reference.**
 CURRENT PHASE     Phase 11 COMPLETE, MERGED, and PUBLISHED — all nine
                   stages APPROVED, COMMITTED (three-commit plan, §21.10),
                   PUSHED (§21.11), merged into main with --no-ff on
-                  2026-09-23 (§21.12), and main PUSHED (fast-forward
-                  29c3cc9..124940a, §21.12 addendum). origin/main =
-                  origin/HEAD = 124940a; 0 ahead / 0 behind.
+                  2026-09-23 (§21.12), main PUSHED (fast-forward
+                  29c3cc9..124940a, §21.12 addendum), and its docs
+                  correction `c1e5f58` PUSHED too (fast-forward
+                  124940a..c1e5f58, §21.13). origin/main = origin/HEAD =
+                  c1e5f58; 0 ahead / 0 behind.
 CURRENT TASK      None in progress. Phase 11 is closed end-to-end.
                   Awaiting the user's direction; no new code until
                   instructed.
 CURRENT BRANCH    main (switched from feature/frontend for the merge)
-CURRENT COMMIT    124940a ("docs: record local merge of feature/frontend
-                  into main") is the pushed tip: origin/main = origin/HEAD
-                  = 124940a. The merge itself is 064e774 (parents 29c3cc9
-                  + 83b6051; tree identical to feature/frontend,
-                  07261f60…; 136 files, +20555). This document's own
-                  correction (docs: record main push, §21.12 addendum)
-                  sits unpushed directly on top of 124940a.
+CURRENT COMMIT    c1e5f58 ("docs: record main push") is the pushed tip:
+                  origin/main = origin/HEAD = c1e5f58 (fast-forward
+                  124940a..c1e5f58, 2026-09-23 01:20 IST). The merge
+                  itself is 064e774 (parents 29c3cc9 + 83b6051; tree
+                  identical to feature/frontend, 07261f60…; 136 files,
+                  +20555), recorded by 124940a, whose own status was
+                  recorded by c1e5f58. The §21.13 housekeeping record
+                  sits in a NEW local commit on top of c1e5f58.
 WORKING TREE      CLEAN. The §24.3 staging trap is HISTORICAL: every
                   Stage 1–9 path was committed in ccb2bb5/b243d86; its
                   untracked table is kept as record only.
@@ -4508,13 +4562,13 @@ SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
                   BASE_URL contract; frontend/Dockerfile + nginx.conf +
                   compose frontend service; theme-color sync; logged-out nav
                   320px overflow found in the production sweep and FIXED.
-KNOWN BLOCKERS    (1) This docs correction commit is itself unpushed
-                  (origin/main = 124940a until it is pushed).
+KNOWN BLOCKERS    (1) The §21.13 housekeeping commit is itself unpushed
+                  (origin/main = c1e5f58 until it is pushed).
                   (2) Fresh-clone seed gap (ISSUE-014) unchanged.
 NEXT ACTION       Await the user's direction — e.g. authorise pushing
-                  this docs correction, or open the P1 queue (§22.2).
-                  Nothing is authorised yet. feature/frontend is fully
-                  pushed and kept (REQ-36).
+                  the §21.13 housekeeping commit, or open the P1 queue
+                  (§22.2). Nothing is authorised yet. feature/frontend
+                  is fully pushed and kept (REQ-36).
 ```
 
 ## 24.2 What to do, in order
@@ -4634,7 +4688,7 @@ Ordered by how quickly you will hit them.
    project — all ten backend phases and all of the frontend — is unmerged on
    `feature/frontend` (§20.2).
 7. **`feature/backend` is redundant.** `feature/frontend` contains all of its work;
-   `d1e65a3` is a duplicate of `1e5e5da` by patch-id (§20.4). Merge `feature/frontend`
+   `d1e65a3` is a duplicate of `7a3ff63` by patch-id (§20.4). Merge `feature/frontend`
    only. Do not delete `feature/backend` (REQ-36).
 8. **There is no Phase 6 commit.** The numbering jumps `5b` → `7`. A numbering gap,
    not missing work (§20.3).

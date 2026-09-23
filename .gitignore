@@ -18,3 +18,6 @@ node_modules
 .serena/
 opencode.json
 .freebuff/
+
+# Runtime log artifact (ISSUE-010) — nodemon dev-server output, never commit
+/server.log
