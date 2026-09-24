@@ -17,29 +17,31 @@
 > **Phase:** Phase 11 — Frontend
 >
 > **Current Stage:** ALL NINE STAGES (1–9) COMPLETE — APPROVED, COMMITTED,
-> PUSHED, MERGED into `main` (--no-ff), and main FULLY PUBLISHED (§21.12
-> + addendum, §21.13, §21.14)
+> PUSHED and MERGED into `main` (--no-ff) (§21.12–§21.14).
+> The subsequent status reconciliation and this docs record are local (§21.15).
 >
-> **Current Task:** None. Phase 11 is fully integrated and published.
-> Awaiting the user's direction. Do not begin new work.
+> **Current Task:** TODO-011 DONE / ISSUE-006 RESOLVED. Documentation recorded;
+> stop and await explicit push approval or direction for new engineering work.
 >
 > **Branch:** `main` (merge session; `feature/frontend` remains at
 > `83b6051`, in sync with origin, NOT deleted)
 >
-> **Commits:** main = merge `064e774` (parents `29c3cc9` + `83b6051`)
-> + docs record `124940a` + docs correction `c1e5f58` + housekeeping
-> `df11dcb`, ALL PUSHED — origin/main = origin/HEAD = `df11dcb`
-> (fast-forward `29c3cc9..124940a` 2026-09-23 01:03 IST, then
-> `124940a..c1e5f58` 01:20 IST, then `c1e5f58..df11dcb` 12:24 IST;
-> §21.12 addendum, §21.13, §21.14); `feature/frontend` = `83b6051` =
-> `origin/feature/frontend` (pushed 2026-09-23 00:46 IST,
-> §21.11–§21.12). The §21.14 final-sync record below is the content
-> of the docs commit at the top of main.
+> **Commits (2026-09-24 documentation checkpoint):** `origin/main` =
+> `origin/HEAD` = `3c08fe7` (the §21.14 final-sync commit). Local `main`
+> = `bc3d042` (`fix(frontend): reconcile submission status vocabulary`)
+> plus this documentation commit, **2 ahead / 0 behind after this commit**.
+> Before this docs commit, `main` was `bc3d042`, 1 ahead / 0 behind.
+> Neither new commit was pushed at the time of this documentation commit.
+> `feature/frontend` remains `83b6051` = `origin/feature/frontend`.
 >
 > **Working tree:** CLEAN.
-> Re-verified 2026-09-23.
+> At the completion of the 2026-09-24 documentation checkpoint (§21.15).
 >
-> **Last verified:** 2026-09-23 (final health audit, §21.14) — frontend
+> **Last verified:** 2026-09-24 implementation verification supplied for
+> `bc3d042` (§21.15): typecheck PASS; lint PASS (0 errors, 5 existing
+> warnings); tests PASS (15 files / 54 tests); build PASS; diff check PASS.
+> The documentation pass checks Git/diffs; it does not rerun code gates.
+> Prior evidence: 2026-09-23 (final health audit, §21.14) — frontend
 > typecheck PASS; tests PASS (14 files / 49 tests); lint 0 errors / 5
 > accepted warnings; build PASS (main chunk 309.51 kB / 94.57 gzip — the
 > >500 kB warning now refers only to the lazy CodeEditor chunk, its
@@ -52,8 +54,9 @@
 > lazy-load, 404, 320px no overflow in both auth states (one logged-out
 > nav overflow found and fixed during the sweep).
 >
-> **Next action:** Await user approval of Stage 9. Do not begin new work.
-> Do not commit.
+> **Next action:** STOP; await explicit approval before pushing. Next open
+> P1 in §22.2 order is TODO-013 / ISSUE-011 (`/metrics` protection), then
+> TODO-014, then TODO-015 / ISSUE-014 (seed mechanism). No new work authorised.
 >
 > ---
 >
@@ -125,6 +128,17 @@ configuration) is where this must be decided. No deployment has ever occurred.
 ---
 
 # 2. CURRENT STATE — READ THIS FIRST
+
+**Current checkpoint — 2026-09-24 (§21.15):** `main` contains `bc3d042`
+plus this documentation commit; at this docs commit, 2 ahead / 0 behind
+`origin/main` (`3c08fe7`), working tree clean, neither new commit pushed.
+TODO-011 is DONE; ISSUE-006 is RESOLVED; TODO-012 / ISSUE-017 remain resolved.
+Stop and await explicit push approval. Next open P1 in §22.2 order is
+TODO-013 / ISSUE-011, ahead of TODO-014 and TODO-015 / ISSUE-014.
+
+**Historical snapshot below — superseded by this checkpoint and §24.1.**
+The dated environment, uncommitted-file list and Stage 2/3 instructions below
+describe the earlier session, not the current branch or approval state.
 
 *All facts in this section verified against the repository on **2026-09-04**.*
 
@@ -292,7 +306,7 @@ Full list in §23. The load-bearing five:
 4. If the user has now approved Stage 3, re-read §3 (Phase 11 stage list) and
    §10 before writing accessibility code.
 
-## NEXT ACTION
+## NEXT ACTION (historical 2026-09-04 snapshot; current action above / §24.1)
 
 ```
 NEXT ACTION:
@@ -615,7 +629,7 @@ tables render and the mobile lists are `display: none`. Editor a11y name
 preserved (`role="textbox"` `[aria-label="Source code editor"]` verified at
 320px).
 
-**Known issues in this phase:** §15 ISSUE-002 (bundle size), ISSUE-006
+**Known issues at the Stage 4 checkpoint (historical):** §15 ISSUE-002 (bundle size), ISSUE-006
 (`SubmissionStatus` enum narrower than the backend's), ISSUE-007 (fonts from a
 CDN), ISSUE-008 (`CodeEditor` `if (value)` guard cannot clear a saved draft).
 
@@ -787,7 +801,8 @@ backend changes, no invented fields. Delivered:
    `verdictLabel` with a `?? { label: status, tone: 'neutral' }` fallback;
    `VerdictBadge` consumes it. Out-of-union statuses render raw in a neutral
    badge instead of throwing. Regression test included. (TODO-011 —
-   reconciling the union itself — remains OPEN; the 'skipped' warning stands.)
+   reconciling the union itself — remained OPEN at Stage 7; completed in
+   `bc3d042`, §21.15. The 'skipped' warning stands.)
 7. **TODO-012 RESOLVED:** `'skipped'` removed from the `STATUSES` **filter
    array** in `pages/Submissions.tsx` only (untouched in the union and
    `verdictMeta`, per the §15 warning). Regression test asserts the option is
@@ -1302,11 +1317,18 @@ the SPA physically cannot receive a hidden case. The mutating routes
 `pending`, `queued`, `compiling`, `running`, `judging`, `accepted`,
 `wrong_answer`, `runtime_error`, `time_limit_exceeded`,
 `memory_limit_exceeded`, `compilation_error`, `internal_error`.
-⚠ `frontend/src/lib/types.ts` declares a **10-member** `SubmissionStatus` union
-that both omits three real backend statuses (`pending`, `compiling`, `running`)
-**and adds one that is not a submission status at all** (`skipped`, which
-`src/services/judge.ts:118` writes to `submission_test_results.status`). See
-ISSUE-006 and ISSUE-017 — the second one is a reachable 400.
+As of `bc3d042` (2026-09-24), `frontend/src/lib/types.ts` declares the
+**13-member shared** `SubmissionStatus` vocabulary: `pending`, `queued`,
+`compiling`, `running`, `judging`, `accepted`, `wrong_answer`,
+`compilation_error`, `runtime_error`, `time_limit_exceeded`,
+`memory_limit_exceeded`, `internal_error`, `skipped`.
+`pending` / `compiling` / `running` were added to match the backend contract.
+`skipped` intentionally remains a valid **per-test** status, written to
+`submission_test_results.status`; it is intentionally excluded from the
+submission filter (ISSUE-017 / TODO-012 remain resolved). All 12 backend
+submission statuses now have explicit frontend metadata (ISSUE-006 resolved).
+Unknown statuses retain the neutral raw-value fallback. Polling and filter
+behavior are unchanged; no backend/database migration was needed.
 
 ## 6.7 Endpoints that DO NOT exist
 
@@ -1739,9 +1761,10 @@ captions/`scope`, landmark elements (`nav`, labelled `main`), focus-visible
 ring on bare links, `prefers-reduced-motion`, and a contrast audit (all 17
 token pairs ≥ 4.5:1 AA). Known residuals, deliberately deferred: the toast
 region is a single `polite` container (error toasts are not `assertive`);
-`VerdictBadge`'s non-total `verdictMeta` lookup is still TODO-010/ISSUE-006
-(the Stage 3 announcement code defends itself with `?.` but the badge does
-not); no automated a11y assertions in the test suite (axe etc. not added —
+the non-total `VerdictBadge` lookup was a Stage 3 residual, subsequently
+resolved by TODO-010 in Stage 7; ISSUE-006's remaining union mismatch was
+resolved by TODO-011 in `bc3d042` (§21.15). No automated a11y assertions in
+the test suite at that checkpoint (axe etc. not added —
 would be a new dependency, REQ-06).
 
 ---
@@ -1880,7 +1903,7 @@ that busybox/Alpine `timeout` returns 143, not 124, which would mis-map TLE to
 - **Compile fails** → `finalize(submission, 'compilation_error', <every test 'skipped'>, { compiler_output })`.
   This is the **only** place `'skipped'` is written, and it is a
   *per-test-result* status. It is **not** a valid `submissions.status`, which is
-  the root of ISSUE-006 / ISSUE-017.
+  the distinction preserved by the resolutions of ISSUE-006 / ISSUE-017.
 - **Worker killed mid-judge (SIGKILL / crash)** → the row stays in `'judging'`
   forever. There is **no** stale-claim reaper and no heartbeat. UNRESOLVED, see
   TODO in §22.
@@ -2245,7 +2268,7 @@ or hygiene debt · **P3** cosmetic / deferred.
 | ISSUE-003 | P1 | **RESOLVED (Stage 9, uncommitted)** | CI never runs on `feature/frontend`; no frontend job at all — branch added to triggers + frontend job added |
 | ISSUE-004 | P3 | OPEN | `morgan` is a dead dependency |
 | ISSUE-005 | P3 | OPEN | 6 legacy `scripts/test-*.js` smoke scripts superseded by `test/` |
-| ISSUE-006 | P1 | **PARTIALLY RESOLVED (Stage 7, uncommitted)** | `SubmissionStatus` union ≠ backend's validator array — the **crash** is fixed (TODO-010 fallback); the union itself is still 10-member (TODO-011 reconciliation remains open) |
+| ISSUE-006 | P1 | **RESOLVED (2026-09-24, `bc3d042`)** | Stage 7's unknown-status fallback retained; TODO-011 adds all missing backend statuses and metadata; shared union intentionally retains per-test `skipped` |
 | ISSUE-007 | P2 | **RESOLVED (Stage 9, uncommitted)** | Fonts loaded from the Google CDN — 7 latin woff2 files self-hosted in public/fonts, CDN links removed |
 | ISSUE-008 | P2 | **RESOLVED (Stage 6, uncommitted)** | `CodeEditor` `if (value)` guard cannot clear a saved draft |
 | ISSUE-009 | P3 | OPEN | Empty `backend/`, `docker/`, `worker/` directories mislead |
@@ -2326,7 +2349,12 @@ test, which is now misleading.
 Left alone on purpose so far — they are the only Docker-judge exercise that
 exists.
 
-### ISSUE-006 — `SubmissionStatus` union does not match the backend, and the mismatch **crashes a render** (P1 — upgraded from P2 on 2026-09-05) — **CRASH RESOLVED 2026-09-13 (Stage 7, uncommitted); union reconciliation still OPEN**
+### ISSUE-006 — `SubmissionStatus` union mismatch and render crash (P1 — upgraded from P2 on 2026-09-05) — **RESOLVED 2026-09-24 (`bc3d042`)**
+
+**Historical finding and Stage 7 partial resolution follow.** They describe
+the earlier implementation; the final resolution below supersedes the open
+union-reconciliation status without changing that history.
+
 Frontend `lib/types.ts:3-6` declares 10 statuses **including `'skipped'`**. The
 backend's validator array (`src/routes/submissions.ts:13-17`) has **12**, including
 `'pending'`, `'compiling'` and `'running'`, and **excluding `'skipped'`**.
@@ -2392,6 +2420,22 @@ the crash class is gone permanently. Pinned by a regression test
 (`Submission.test.tsx` "an out-of-union verdict … not a crash"). **Part 2
 (reconciling the 10-member union with the backend's 12) remains OPEN as
 TODO-011** — the warning above about NOT deleting 'skipped' still stands.
+
+**FINAL RESOLUTION (2026-09-24, `bc3d042` — `fix(frontend): reconcile submission status vocabulary`):**
+TODO-011 is DONE. The audit identified latent contract drift, not an active
+production defect: Stage 7 had already fixed the crash. The frontend no longer
+has the submission-status union mismatch: `pending`, `compiling`, and `running`
+are now in the shared union and `verdictMeta`, covering all 12 backend statuses.
+The shared union has 13 members (§6.6), intentionally retaining `skipped` for
+per-test results. It remains excluded from the submission filter; ISSUE-017 /
+TODO-012 stay resolved and their warning must be preserved.
+The unknown-status neutral fallback still exists; its regression uses
+`future_status` now that `pending` is recognised. Five new verdict tests cover
+the 12-status backend contract fixture, added labels/tones, the five transient
+and seven terminal statuses, and per-test `skipped`; the page regression also
+checks the neutral `Skipped` badge. Polling and filter behavior are unchanged.
+This was frontend-only: no backend/database change or migration was needed.
+Verification evidence and the four-file implementation are recorded in §21.15.
 
 ### ISSUE-007 — Fonts from the Google CDN (P2)
 `frontend/index.html` loads IBM Plex Sans + JetBrains Mono from
@@ -4342,15 +4386,68 @@ changes; no history rewritten; dated historical records left as-is.
 
 ---
 
+## 21.15 SESSION-2026-09-24 — submission status contract reconciliation
+
+Authorised documentation-only follow-up to the completed TODO-011 / ISSUE-006
+implementation. Only `PROJECT_STATE.md` changed in this documentation commit;
+earlier §21 session entries remain unchanged.
+
+- **Finding:** the audit identified latent contract drift, not an active
+  production defect. Stage 7's fallback already prevented the original crash;
+  the shared frontend union still omitted three valid backend statuses.
+- **Code commit created:** `bc3d042ce47aec02ba6344b527a309c38413ea9e`
+  (`bc3d042`) — `fix(frontend): reconcile submission status vocabulary`.
+  Repository inspection confirms four frontend files changed, 53 insertions /
+  9 deletions: `frontend/src/lib/types.ts`, `frontend/src/lib/verdict.ts`,
+  `frontend/src/lib/verdict.test.ts`, `frontend/src/pages/Submission.test.tsx`.
+- **Implementation:** added `pending`, `compiling`, `running` and their metadata;
+  all 12 backend submission statuses are represented. The 13-member shared
+  union retains per-test `skipped`, intentionally excluded from the filter.
+  TODO-011 DONE; ISSUE-006 fully RESOLVED; ISSUE-017 / TODO-012 remain resolved.
+- **Tests added/updated:** five new verdict tests cover backend vocabulary,
+  metadata, terminal classification and `skipped`; page tests retain the
+  unknown-status fallback using `future_status` and assert neutral `Skipped`.
+- **Completed implementation verification supplied for `bc3d042` — all gates green:**
+
+  | Command | Result |
+  |---|---|
+  | `npm run typecheck` (frontend) | PASS |
+  | `npm run lint` (frontend) | PASS — 0 errors, 5 existing warnings |
+  | `npm test` (frontend) | PASS — 15 files / 54 tests |
+  | `npm run build` (frontend) | PASS |
+  | `git diff --check` | PASS |
+
+  The documentation follow-up records these completed code gates; it does not
+  rerun them. Its own review checks the document diff, unchanged historical
+  ledger, one-file staged scope, whitespace, commit ancestry and ref positions.
+- **Scope preserved:** no backend/database changes or migration; no polling or
+  filter changes. The unknown-status fallback remains. No source, tests or
+  configuration changed during this documentation follow-up.
+- **Current-state correction:** Git shows the §21.14 docs commit is `3c08fe7`
+  and is already at `origin/main` / `origin/HEAD`; the earlier current-state
+  blocks still named `df11dcb`. The dated §21.14 record remains unchanged.
+  Queue order in §22.2 puts TODO-013 / ISSUE-011 next, followed by TODO-014,
+  then TODO-015 / ISSUE-014 (seed mechanism); no priorities were reordered.
+- **State at the time of this documentation commit:** `main` = `bc3d042` plus
+  this docs commit (`docs: record submission status contract reconciliation`),
+  2 ahead / 0 behind `origin/main` (`3c08fe7`), working tree clean. Before this
+  docs commit, `main` was `bc3d042`, clean and 1 ahead / 0 behind. Neither new
+  commit was pushed at the time of this record's commit. No branch switch,
+  amendment or push; other branch/remote refs unchanged. Stop here and await
+  explicit approval before any push or further engineering work.
+
+---
+
 # 22. CURRENT TODO LIST
 
 Every item traces to a verified finding in §15 or a decision in §17. Priorities are
 **impact-ordered, not effort-ordered**. A `TODO-` id is stable: it is never renumbered,
 and a completed item is marked DONE with its commit, never deleted.
 
-**Nothing in this list is authorised to be implemented right now.** The live gate is
-§19.2: Stage 2 awaits approval. This section tells a future session *what* to do once
-told to, and in what order — it is not a work queue to start draining.
+**No further item is authorised to be implemented right now.** Phase 11's
+stage approvals are complete; TODO-011 and this documentation follow-up are
+complete (§21.15). Await explicit direction for the next engineering item;
+the impact order below is unchanged, not a work queue to start draining.
 
 ## 22.1 P0 — blocks all runtime verification
 
@@ -4364,9 +4461,9 @@ told to, and in what order — it is not a work queue to start draining.
 
 | id | Task | Source | Fix size |
 |---|---|---|---|
-| TODO-010 | Make `verdictMeta` lookup total in `VerdictBadge` — `?? { label: status, tone: 'neutral' }` | ISSUE-006 | **1 line.** Do this before TODO-011; it is the guard that stays correct regardless. |
-| TODO-011 | Reconcile the status lists: add `'pending' \| 'compiling' \| 'running'` to `SubmissionStatus` + `verdictMeta`, keep `'skipped'`, add a test asserting agreement with the backend array | ISSUE-006 | small |
-| TODO-012 | Remove `'skipped'` from the `STATUSES` **filter array** in `Submissions.tsx` (⚠ not from the union — see the warning under ISSUE-017) | ISSUE-017 | **1 line** |
+| TODO-010 | Make `verdictMeta` lookup total in `VerdictBadge` — `?? { label: status, tone: 'neutral' }` | ISSUE-006 | **DONE (Stage 7, §21.7; integrated in `ccb2bb5`)** — fallback preserved by `bc3d042`. |
+| TODO-011 | Reconcile the status lists: add `'pending' \| 'compiling' \| 'running'` to `SubmissionStatus` + `verdictMeta`, keep `'skipped'`, add backend-contract vocabulary tests | ISSUE-006 | **DONE (2026-09-24, `bc3d042`, §21.15)** — 13-member shared union (§6.6); polling/filter behavior unchanged. |
+| TODO-012 | Remove `'skipped'` from the `STATUSES` **filter array** in `Submissions.tsx` (⚠ not from the union — see the warning under ISSUE-017) | ISSUE-017 | **DONE (Stage 7, §21.7; integrated in `ccb2bb5`)** — remains resolved; filter unchanged by `bc3d042`. |
 | TODO-013 | Protect `/metrics` — bind to an internal interface, or require a token, or drop it from the public router | ISSUE-011 | small; backend change, so needs REQ-02 justification |
 | TODO-014 | Refresh-token rotation + revocation + a real logout | ISSUE-015 | **design work, not a patch.** Currently a stolen refresh token is valid for its full `JWT_REFRESH_EXPIRES_IN` with no way to revoke it. Write an ADR before coding. |
 | TODO-015 | A seed mechanism — `database/init/` and `database/seeds/` are both empty, so a fresh database has no languages, no problems, no admin | ISSUE-014 | medium. Blocks TODO-003 in practice: nothing can be submitted against zero problems. |
@@ -4397,15 +4494,12 @@ told to, and in what order — it is not a work queue to start draining.
 
 ## 22.5 The actual next action
 
-There is exactly one, and it is not on the lists above:
-
-> **Wait for the user to approve or reject Stage 2.** On approval, Stage 3
-> (accessibility) begins — see §18.3 for its scope and §24 for the entry procedure.
-> On rejection, address the specific objection within Stage 2 and re-present.
-
-Do not opportunistically start a P1 item "while waiting." REQ-01 and REQ-12 make
-stage order the user's decision, and TODO-010/012 are one-liners that belong to a
-stage, not to an idle moment.
+**Stop after the documentation commit and await explicit push approval.**
+TODO-011 is complete. The next real open P1 in the existing §22.2 order is
+**TODO-013 / ISSUE-011 — protect `/metrics`**, followed by TODO-014 (refresh
+token lifecycle), then TODO-015 / ISSUE-014 (seed mechanism). The seed gap
+remains open, but does not precede those security items in the documented queue.
+Do not start any of them without the user's direction.
 
 ---
 
@@ -4456,8 +4550,9 @@ An agent about to change any of these should first find the ADR that established
   terminal submission forever. The current form stops on both conditions for free.
 
 **INV-06 — A `verdictMeta` lookup must never be assumed total.**
-- Status: **currently VIOLATED** — see ISSUE-006 / TODO-010. Listed here as the
-  invariant to establish, not one to preserve.
+- Status: **ESTABLISHED (Stage 7, TODO-010), preserved by `bc3d042`.**
+  `verdictMetaOf` retains the neutral raw-value fallback; the `future_status`
+  regression covers unrecognised values even after ISSUE-006 / TODO-011 closure.
 
 ## 23.2 Backend / API
 
@@ -4573,24 +4668,27 @@ CURRENT PHASE     Phase 11 COMPLETE, MERGED, and PUBLISHED — all nine
                   `c1e5f58` PUSHED (fast-forward 124940a..c1e5f58,
                   §21.13), and housekeeping `df11dcb` PUSHED
                   (fast-forward c1e5f58..df11dcb, §21.14).
-                  origin/main = origin/HEAD = df11dcb; 0 ahead / 0 behind.
-CURRENT TASK      None in progress. Phase 11 is closed end-to-end.
-                  Awaiting the user's direction; no new code until
-                  instructed.
+                  Subsequent status reconciliation is recorded in §21.15.
+CURRENT TASK      TODO-011 DONE / ISSUE-006 RESOLVED; documentation complete.
+                  Stop and await explicit push approval / new direction.
 CURRENT BRANCH    main (switched from feature/frontend for the merge)
-CURRENT COMMIT    df11dcb ("chore: repository housekeeping and state
-                  cleanup") is the pushed tip: origin/main = origin/HEAD
-                  = df11dcb (fast-forward c1e5f58..df11dcb,
-                  2026-09-23 12:24 IST). Behind it: docs correction
-                  c1e5f58, which recorded 124940a, which recorded the
-                  merge 064e774 (parents 29c3cc9 + 83b6051; tree
-                  identical to feature/frontend, 07261f60…; 136 files,
-                  +20555). df11dcb itself carried the §21.13
-                  housekeeping record below.
-WORKING TREE      CLEAN. The §24.3 staging trap is HISTORICAL: every
+CURRENT COMMIT    At the 2026-09-24 docs checkpoint: bc3d042
+                  ("fix(frontend): reconcile submission status vocabulary")
+                  plus this docs commit ("docs: record submission status
+                  contract reconciliation"). origin/main = origin/HEAD =
+                  3c08fe7 (§21.14 docs). Before this docs commit: 1 ahead /
+                  0 behind; after it: 2 ahead / 0 behind. Neither new commit
+                  was pushed at the time of this documentation commit.
+WORKING TREE      CLEAN at this documentation checkpoint. The §24.3 staging
+                  trap is HISTORICAL: every
                   Stage 1–9 path was committed in ccb2bb5/b243d86; its
                   untracked table is kept as record only.
-LAST VERIFIED     2026-09-23 (§21.14 final health audit) — frontend gates
+LAST VERIFIED     2026-09-24 implementation evidence supplied for bc3d042:
+                  npm run typecheck PASS; npm run lint PASS (0 errors,
+                  5 existing warnings); npm test PASS (15 files / 54 tests);
+                  npm run build PASS; git diff --check PASS (§21.15).
+                  Documentation follow-up verifies Git/diffs only.
+                  Prior audit: 2026-09-23 (§21.14) — frontend gates
                   PASS (typecheck; tests 14 files / 49 tests; lint 0 err +
                   the 5 accepted warnings; build — main chunk 309.51 kB /
                   94.57 gzip); backend typecheck/build PASS, tests 16/16
@@ -4603,22 +4701,22 @@ LAST VERIFIED     2026-09-23 (§21.14 final health audit) — frontend gates
                   editor lazy-load, 404, 320px no overflow in both auth
                   states. Source and bundle audited: no secrets, no CDN,
                   no console.log, no stray localhost. CI YAML valid.
-VERIFIED THIS     CodeEditor lazy-loaded (ISSUE-002 RESOLVED); fonts
-SESSION           self-hosted (ISSUE-007 RESOLVED); CI frontend job +
-                  feature/frontend trigger (ISSUE-003 RESOLVED); VITE_API_
-                  BASE_URL contract; frontend/Dockerfile + nginx.conf +
-                  compose frontend service; theme-color sync; logged-out nav
-                  320px overflow found in the production sweep and FIXED.
+VERIFIED THIS     bc3d042 changes four frontend files: union, verdict metadata,
+SESSION           new verdict tests and page regressions. All 12 backend
+                  submission statuses covered; per-test skipped retained;
+                  unknown-status fallback preserved. No backend/database,
+                  polling or filter changes. This docs commit changes only
+                  PROJECT_STATE.md; older session entries preserved.
 KNOWN BLOCKERS    (1) Fresh-clone seed gap (ISSUE-014) unchanged —
                   database/init/ and database/seeds/ are both empty.
-                  (2) P1 queue open (§22.2): TODO-011 status-vocabulary
-                  reconciliation is next in impact order (TODO-010's
-                  guard landed; TODO-012 resolved).
-NEXT ACTION       Await the user's direction — e.g. open the P1 queue
-                  (§22.2) or another gated task. Nothing new is
-                  authorised yet. Everything built so far is published:
-                  origin/main = df11dcb. feature/frontend is fully
-                  pushed and kept (REQ-36).
+                  (2) Next open P1 in §22.2 order: TODO-013 / ISSUE-011
+                  (/metrics protection), then TODO-014, then TODO-015 /
+                  ISSUE-014. TODO-010/011/012 are DONE; ISSUE-006 and
+                  ISSUE-017 are RESOLVED.
+NEXT ACTION       STOP; explicit approval required before any push. No new
+                  engineering work authorised. feature/frontend is fully
+                  pushed and kept (REQ-36). Local publication state above
+                  is scoped to the time of this documentation commit.
 ```
 
 ## 24.2 What to do, in order
@@ -4744,12 +4842,14 @@ Ordered by how quickly you will hit them.
    not missing work (§20.3).
 9. **`?page=0` silently becomes page 1** — `src/lib/query.ts`'s `int` uses
    `|| fallback`. Intended; do not "fix" it into a 400 without an ADR.
-10. **`'skipped'` is a per-test-result status, not only a submission status.** Removing
-    it from `SubmissionStatus` or `verdictMeta` breaks the result table. Only the
-    *filter array* in `Submissions.tsx` needs to lose it (ISSUE-017, TODO-012).
-11. **Frontend and backend status vocabularies differ** (10 vs 12) and the frontend is
-    missing the DB default, `pending`. This is a live render crash, not a typing nit
-    (ISSUE-006 / TODO-010 — fix the guard before reconciling the lists).
+10. **`'skipped'` is a per-test-result status, not a submission status.** Removing
+    it from `SubmissionStatus` or `verdictMeta` breaks the result table. It was
+    removed only from the *filter array* in Stage 7 (ISSUE-017 / TODO-012 remain
+    resolved). Keep this distinction when changing the shared vocabulary.
+11. **Status contract reconciled in `bc3d042` (TODO-011 / ISSUE-006 resolved).**
+    The shared frontend union covers all 12 backend submission statuses plus
+    per-test `skipped`. The earlier 10-vs-12 mismatch is historical; preserve
+    both explicit metadata and the unknown-status fallback (TODO-010).
 
 ---
 
