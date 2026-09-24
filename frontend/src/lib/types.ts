@@ -1,7 +1,9 @@
 export type Role = 'user' | 'moderator' | 'admin';
 export type Difficulty = 'easy' | 'medium' | 'hard';
+// Shared vocabulary for submission-level statuses and per-test results.
 export type SubmissionStatus =
-  | 'queued' | 'judging' | 'accepted' | 'wrong_answer'
+  | 'pending' | 'queued' | 'compiling' | 'running' | 'judging'
+  | 'accepted' | 'wrong_answer'
   | 'time_limit_exceeded' | 'memory_limit_exceeded' | 'runtime_error'
   | 'compilation_error' | 'internal_error' | 'skipped';
 export interface User { id: string; username: string; email: string; role: Role; }

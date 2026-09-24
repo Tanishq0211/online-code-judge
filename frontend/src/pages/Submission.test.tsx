@@ -162,18 +162,17 @@ test('compiler output renders only when the backend returned it', async () => {
   renderAt('/submissions/60');
   expect(await screen.findByText(/expected ';' before return/)).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Copy compiler output' })).toBeInTheDocument();
+  expect(screen.getByText('Skipped')).toHaveClass('bg-bg', 'text-fg-secondary');
 });
 
 test('an out-of-union verdict from the backend renders as a neutral badge, not a crash (TODO-010)', async () => {
   vi.mocked(api.getSubmission).mockResolvedValue({
-    submission: submission({ status: 'pending' as never }),
+    submission: submission({ status: 'future_status' as never }),
     testResults: [],
   });
   renderAt('/submissions/60');
-  // 'pending' is a real backend status that the frontend union omits; the
-  // fallback must show the raw value instead of throwing on .tone. The page
-  // treats it as non-terminal (isTerminal has no 'pending'), which is correct.
-  expect(await screen.findByText('pending')).toBeInTheDocument();
+  // An unknown future status must retain the raw-value fallback and polling.
+  expect(await screen.findByText('future_status')).toHaveClass('bg-bg', 'text-fg-secondary');
   expect(screen.getByText(/judging in progress/)).toBeInTheDocument();
 });
 

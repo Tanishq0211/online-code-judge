@@ -2,7 +2,10 @@ import type { SubmissionStatus } from './types';
 import type { Tone } from '../components/ui/Badge';
 
 export const verdictMeta: Record<SubmissionStatus, { label: string; tone: Tone }> = {
+  pending:               { label: 'Pending',               tone: 'neutral' },
   queued:                { label: 'Queued',                tone: 'neutral' },
+  compiling:             { label: 'Compiling',             tone: 'info' },
+  running:               { label: 'Running',               tone: 'info' },
   judging:               { label: 'Judging',               tone: 'info' },
   accepted:              { label: 'Accepted',              tone: 'success' },
   wrong_answer:          { label: 'Wrong Answer',          tone: 'error' },
@@ -14,9 +17,8 @@ export const verdictMeta: Record<SubmissionStatus, { label: string; tone: Tone }
   skipped:               { label: 'Skipped',               tone: 'neutral' },
 };
 
-/* The backend's status vocabulary is wider than this union (it also has
-   'pending'/'compiling'/'running'), so a lookup can miss at runtime. Never
-   assume totality: fall back to the raw status string (TODO-010). */
+/* Unrecognized runtime statuses still fall back to the raw status string
+   with a neutral tone (TODO-010). */
 export const verdictMetaOf = (status: SubmissionStatus): { label: string; tone: Tone } =>
   verdictMeta[status] ?? { label: status, tone: 'neutral' };
 
